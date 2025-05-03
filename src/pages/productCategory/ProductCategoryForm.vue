@@ -1,6 +1,6 @@
 <template>
-    <div v-if="loading0 && !errorMessage" class="flex justify-center mt-10">
-      <span class="loading loading-spinner text-indigo-600"></span>
+    <div v-if="(isLoadingProductCategory && !errorMessage) || isLoadingAlpha  " class="flex justify-center mt-10">
+      <span class="block loading loading-spinner text-indigo-600"></span>
     </div>
   
     <transition v-else-if="authStore.isLoggedIn && authStore.isAdmin" name="fade-slide" appear>
@@ -37,7 +37,7 @@
 
           <div>
             <label class="form-label">{{isLanguageTigrigna? "ምድብ":"Category"}}</label>
-            <CustomDropdown v-model="formData.categoryId" :list="categoryList" />
+            <CustomDropdown v-model="formData.categoryId" :list="categoriesAlphaNoLimit" />
           </div>
   
           <div>
@@ -97,86 +97,68 @@
   </template>
   
 <script setup>
-import { ref, onMounted, defineProps , computed , } from 'vue';
+import { ref,defineProps , computed, watch , } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useCategoryStore } from '../../store/categoryStore';
-import { useProductCategoryStore } from '../../store/productCategoryStore';
 import { useAuthStore } from '../../store/authStore';
 import CustomDropdown from '../../components/dropDown.vue';
 import { useLanguageStore } from '../../store/languageStore';
+import { useCategoryAlphaNoLimit } from '../../store/useCategory';
+import { useCreateProductCategory, useProductCategory, useUpdateProductCategory } from '../../store/useProductCategory';
+import { useQueryClient } from '@tanstack/vue-query';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
 let authStore = useAuthStore();
-const categoryStore = useCategoryStore();
-const productCategoryStore = useProductCategoryStore();
 let route = useRoute();
 let router = useRouter();
-let categoryList = ref([]);
 let formData = ref({
     name: null,
     categoryId: null,
     description: null,
     color: null,
     code: null,
-})
-let response = ref("");
+});
 let errorMessage = ref(false);
 let successMessage = ref(false);
 let props = defineProps(['drawerOpen','isEditing']);
-let loading0 = ref(props.isEditing ? true: false);
 let loading1 = ref(false);
 let id = route.params.id;
-
-
 
 const containerClass = computed(() => ({
     'ml-56 md:ml-60 lg:ml-72 w-1/2': props.drawerOpen,
     'ml-8 w-full': !props.drawerOpen 
 }));
 
-onMounted(async () => {
-    if(props.isEditing){
-        await fetchProductCategory();
-    }else{
-        await fetchCategories();
-    }
-})
 
-async function fetchProductCategory(){
-    response.value = await productCategoryStore.getProductCategory(authStore.token, id);
-    if (response.value.flag == 1) {
-        errorMessage.value = false;
-        formData.value = response.value.data.data;
-        if (categoryStore.alphaNoLimit.length == 0) {
-            response.value = await categoryStore.getCategoriesAlphaNoLimit(authStore.token);
-            if (response.value.flag == 1) {
-                errorMessage.value = false;
-            } else {
-                errorMessage.value = response.value.message;
-            }
-        }
-        categoryList.value = categoryStore.alphaNoLimit;
-    } else {
-        errorMessage.value = response.value.message;
+const {isLoading: isLoadingAlpha,data: categoriesAlphaNoLimit,isError: isAlphaError, error: alphaError} = useCategoryAlphaNoLimit(authStore.token);
+
+
+const {isLoading: isLoadingProductCategory, data: productCategory,isError: isErrorProductCategory, error: productCategoryError} = useProductCategory(id,authStore.token);
+
+watch(productCategory,()=>{
+  if(productCategory.value && props.isEditing){
+    formData.value =  {
+      name: productCategory.value.name,
+      categoryId: productCategory.value.categoryId,
+      description: productCategory.value.description,
+      color: productCategory.value.color,
+      code: productCategory.value.code,
     }
-    loading0.value = false;
-}
-async function fetchCategories(){
-    if (categoryStore.alphaNoLimit.length == 0) {
-            response.value = await categoryStore.getCategoriesAlphaNoLimit(authStore.token);
-            if (response.value.flag == 1) {
-                errorMessage.value = false;
-            } else {
-                errorMessage.value = response.value.message;
-            }
-        }
-        categoryList.value = categoryStore.alphaNoLimit;
-}
+  }
+  
+},{immediate:true});
+
+const updateProductCategoryMutation = useUpdateProductCategory(authStore.token);
+
+const createProductCategoryMutation = useCreateProductCategory(authStore.token);
+
+const queryClient = useQueryClient();
+
 function closeModal() {
     router.push('/productCategoryList');
 }
 async function handleSubmit(){
+  console.log("value of formdata",formData.value);
     if(props.isEditing){
 
         await handleUpdate()
@@ -204,19 +186,25 @@ async function handleCreate(){
         successMessage.value = false;
     }
     else{
-        response.value = await productCategoryStore.createProductCategory(formData.value, authStore.token);
-    if (response.value.flag == 1) {
-        successMessage.value = true;
-        errorMessage.value = false;
-        loading1.value = false;
-        router.push('/productCategoryList');
-    } else {
-        errorMessage.value = response.value.message;
-        successMessage.value = false;
-    }
+        await createProductCategoryMutation.mutateAsync(formData.value,{
+          onSuccess:()=>{
+            queryClient.invalidateQueries(['product_categories']);
+            queryClient.invalidateQueries(['product_sub_categories']);
+            queryClient.invalidateQueries(['product_categories_alpha_no_limit']);
+            queryClient.invalidateQueries(["products_data"]);
+
+            successMessage.value = true;
+            router.push('/productCategoryList');
+          },
+          onError:(e)=>{
+            errorMessage = e.message;
+        },
+        onSettled:()=>{
+          loading1.value = false;
+        }
+      });
     }
    
-    loading1.value = false;
 }
 async function handleUpdate() {
     loading1.value = true;
@@ -234,24 +222,30 @@ async function handleUpdate() {
     if (!formData.value.categoryId) {
         errorMessage.value = "category can't be empty";
     }else{
-        response.value = await productCategoryStore.updateProductCategory(id, {
-        color: formData.value.color,
-        name: formData.value.name,
-        description: formData.value.description,
-        code: formData.value.code,
-        categoryId: formData.value.categoryId
-    }, authStore.token);
-    if (response.value.flag == 1) {
+      await updateProductCategoryMutation.mutateAsync({id:id,data:
+        {
+          color: formData.value.color,
+          name: formData.value.name,
+          description: formData.value.description,
+          code: formData.value.code,
+          categoryId: formData.value.categoryId
+        }
+    },{
+      onSuccess:()=>{
+        queryClient.invalidateQueries(['product_categories']);
+        queryClient.invalidateQueries(['product_sub_categories']);
+        queryClient.invalidateQueries(['product_categories_alpha_no_limit']);
+        queryClient.invalidateQueries(["products_data"]);
         successMessage.value = true;
-        errorMessage.value = "";
+      },
+      onError:(e)=>{
+        errorMessage.value = e.message;
+      },
+      onSettled:()=>{
         loading1.value = false;
-        router.push('/productCategoryList');
-    } else {
-        errorMessage.value = response.value.message;
-        successMessage.value = false;
-    }
-    }
-    loading1.value = false;
+      }
+    });
+  }
 }
 
 </script>

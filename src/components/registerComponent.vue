@@ -53,46 +53,49 @@
 <script setup>
 import { ref, defineProps, computed } from 'vue';
 import { useAuthStore } from '../store/authStore';
-import { useRouter } from 'vue-router';
 import { useLanguageStore } from '../store/languageStore';
+import { useCreateUser } from '../store/useUser';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(()=>languageStore.languagePreference == "ti");
-
-
 
 let email = ref("");
 let password = ref("");
 let fullName = ref("");
 let registerError = ref(false);
 let registerSuccess = ref(false);
-let response = ref("");
 let loading = ref(false);
 const userAuth = useAuthStore();
-let router = useRouter(); 
-
 let props = defineProps(['drawerOpen']);
-
 const containerClass = computed(() => ({
     'ml-56 md:ml-60 lg:ml-72': props.drawerOpen,
     'ml-8': !props.drawerOpen 
 }));
 
+const registerUserMutation = useCreateUser(userAuth.token);
+const queryClient = useQueryClient();
 async function handleSubmit() {
   loading.value = true;
   registerSuccess.value = false;
   registerError.value = false;
-  response.value = await userAuth.register(email.value, password.value, fullName.value);
-  if (response.value.flag == 1) {
-    registerSuccess.value = true;
-    registerError.value = false;
-    loading.value = false;
-    router.push('/userList');
-  } else {
-    registerError.value = response.value.message;
-    registerSuccess.value = false;
-  }
-  loading.value = false;
+  await registerUserMutation.mutateAsync({
+    email: email.value,
+    fullName: fullName.value,
+    password: password.value
+  },{
+    onSuccess:()=>{
+      queryClient.invalidateQueries(["users"]);
+      registerSuccess.value = "true";
+    },
+    onError:(e)=>{
+      registerError.value = e.message;
+    },
+    onSettled:()=>{
+      loading.value = false;
+    }
+  })
+  
 }
 </script>
 <style scoped></style>

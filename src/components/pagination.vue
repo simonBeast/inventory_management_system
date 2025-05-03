@@ -16,11 +16,12 @@
 import { defineProps} from 'vue';
 import { useLanguageStore } from '../store/languageStore';
 import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(()=>languageStore.languagePreference == "ti");
-
-
+const router = useRouter();
+const route = useRoute();
 const props = defineProps({
     totalPages: {
         type: Number,
@@ -32,11 +33,19 @@ const props = defineProps({
     }
 });
 
+console.log("pagination data",props.currentPage,props.totalPages);
+
 const emit = defineEmits(['page-changed']);
 
 function changePage(page){
     if (page > 0 && page <= props.totalPages) {
+        router.replace({query:{
+            ...route.query,
+            page: page
+        }});
+
         emit('page-changed', page);
+
     }
 };
 </script>

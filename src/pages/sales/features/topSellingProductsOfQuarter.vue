@@ -1,5 +1,5 @@
 <template>
-    <span v-if="loading && !errorMessage" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
+    <span v-if="isLoading && !errorMessage" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
     <div v-else-if="!errorMessage && authStore.isLoggedIn && authStore.isAdmin" :class="containerClass"
         class="overflow-x-auto mx-auto mt-5 mr-2 w-4/5 mb-16">
         <h3
@@ -15,7 +15,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in saleStore.topSellingProductsOfQuarter" :key="index">
+                <tr v-for="(item, index) in data" :key="index">
                     <th>{{ index + 1 }}</th>
                     <td>{{ item.productId }}</td>
                     <td>{{ item.Product.productName }}</td>
@@ -30,17 +30,17 @@
 </template>
 <script setup>
 
-import { ref, onMounted,defineProps, computed, } from 'vue';
+import { ref, defineProps, computed, watch, } from 'vue';
 import { useAuthStore } from '../../../store/authStore';
-import { useSaleStore } from '../../../store/saleStore';
 import { useLanguageStore } from '../../../store/languageStore';
+import { useTopSellingProductQuarter } from '../../../store/useSales';
+
 const languageStore = useLanguageStore();
+
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
+
 let authStore = useAuthStore();
-let saleStore = useSaleStore();
-let response = ref("");
-let topSellingProductsOfQuarter = ref([]);
-let loading = ref(true);
+
 let errorMessage = ref(false);
 
 let props = defineProps(['drawerOpen']);
@@ -50,21 +50,15 @@ const containerClass = computed(() => ({
     'ml-8': !props.drawerOpen 
 }));
 
-onMounted(async () => {
-    if (saleStore.topSellingProductsOfQuarter.length == 0) {
-        response.value = await saleStore.getTopSellingProductsOfQuarter(authStore.token);
-        if (response.value.flag == 1) {
-            errorMessage.value = false;
-            topSellingProductsOfQuarter.value = response.value.data.data;
-        } else {
-            errorMessage.value = response.value.message;
-        }
-    }
-    else {
-        topSellingProductsOfQuarter.value = saleStore.topSellingProductsOfQuarter;
-    }
-    loading.value = false;
-})
+const { isLoading, data, isError,error } = useTopSellingProductQuarter(authStore.token);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
+  } else {
+    errorMessage.value = "";
+  }
+});
 
 
 

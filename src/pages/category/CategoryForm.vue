@@ -3,6 +3,7 @@
     class="mt-12 px-4 sm:px-6 lg:px-8 w-full max-w-2xl mx-auto">
     <span v-if="loading0 && !errorMessage"
       class="block loading loading-spinner text-primary mt-6 mx-auto transition"></span>
+
     <div
       class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-10 transition-all duration-300 border border-gray-100 dark:border-gray-700">
       <div class="relative mb-8">
@@ -45,7 +46,7 @@
                   : 'Update Category'
                 : isLanguageTigrigna
                   ? 'ምድብ ፍጠር'
-          : 'Create Category'
+                  : 'Create Category'
           }}
         </button>
       </form>
@@ -55,8 +56,9 @@
           {{ errorMessage }}
         </p>
         <p v-if="successMessage" class="text-sm text-green-600 font-medium">
-          {{isLanguageTigrigna ? 'ምድብ':'Category'}} {{ props.isEditing ? isLanguageTigrigna ? 'ተዓርዩ': "updated" : isLanguageTigrigna ? 'ተፈጢሩ' : "created" }} 
-          {{isLanguageTigrigna? 'ኣሎ':'successfully!'}}
+          {{ isLanguageTigrigna ? 'ምድብ' : 'Category' }}
+          {{ props.isEditing ? (isLanguageTigrigna ? 'ተዓርዩ' : 'updated') : (isLanguageTigrigna ? 'ተፈጢሩ' : 'created') }}
+          {{ isLanguageTigrigna ? 'ኣሎ' : 'successfully!' }}
         </p>
         <span v-if="loading1 && !errorMessage && !successMessage"
           class="block loading loading-spinner text-indigo-600 mx-auto mt-4"></span>
@@ -66,99 +68,85 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, computed } from 'vue';
+import { ref, computed, defineProps, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useCategoryStore } from '../../store/categoryStore';
+import {useQueryClient } from '@tanstack/vue-query';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
-const languageStore = useLanguageStore();
-const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
+import { useCategory, useCreateCategory, useUpdateCategory } from '../../store/useCategory';
 
+const props = defineProps(['drawerOpen', 'isEditing']);
 const route = useRoute();
 const router = useRouter();
-const categoryStore = useCategoryStore();
-const authStore = useAuthStore();
 
-const name = ref(null);
-const response = ref('');
-const props = defineProps(['drawerOpen', 'isEditing']);
-const errorMessage = ref(false);
-const successMessage = ref(false);
-const loading1 = ref(false);
-const loading0 = ref(props.isEditing ? true : false);
 const id = route.params.id;
+const name = ref('');
+const response = ref(null);
+const errorMessage = ref(null);
+const successMessage = ref(null);
+const queryClient = useQueryClient();
+const authStore = useAuthStore();
+const languageStore = useLanguageStore();
+const loading1 = ref(false);
+
+const isLanguageTigrigna = computed(() => languageStore.languagePreference === 'ti');
 
 const containerClass = computed(() => ({
   'ml-56 md:ml-60 lg:ml-72 w-1/2': props.drawerOpen,
-  'ml-8 w-full': !props.drawerOpen
+  'ml-8 w-full': !props.drawerOpen,
 }));
-onMounted(async () => {
+
+const { data: category, isLoading: loading0 } = useCategory(id, authStore.token);
+
+watch(category, (value) => {
+  if (value && props.isEditing) name.value = value.name;
+}, { immediate: true });
+
+
+const createMutation = useCreateCategory(authStore.token);
+
+const updateMutation = useUpdateCategory(authStore.token);
+
+const handleSubmit = async () => {
+
+  if (!name.value) return;
+
   if (props.isEditing) {
-    await fetchCategory();
+    loading1.value = true;
+    response.value = await updateMutation.mutateAsync({id: id,data: {name:name.value}},{
+      onSuccess:()=>{
+        queryClient.invalidateQueries(['categories',id]);
+        queryClient.invalidateQueries(['categories']);
+        queryClient.invalidateQueries(['product_categories']);
+        queryClient.invalidateQueries(['categories_alpha_no_limit']);
+        successMessage.value = "Category Created Successfully";
+        loading1.value = false;
+        router.push('/categoryList');
+    },
+    onError:(e)=>{
+      errorMessage.value =  e.message;
+      loading1.value = false;
+    }
+  });
   } else {
-
+    response.value = await createMutation.mutateAsync(name.value,{
+      onSuccess:()=>{
+        queryClient.invalidateQueries(['categories']);
+        queryClient.invalidateQueries(['product_categories']);
+        queryClient.invalidateQueries(['categories_alpha_no_limit']);
+        queryClient.invalidateQueries(["products_data"]);
+        successMessage.value = "Category Updated Successfully";
+        loading1.value = false;
+        router.push('/categoryList');
+    },
+    onError:(e)=>{
+      errorMessage.value =  e.message;
+      loading1.value = false;
+    }
+  });
   }
-});
+};
 
-
-async function fetchCategory() {
-  response.value = await categoryStore.getCategory(id, authStore.token);
-  if (response.value.flag === 1) {
-    name.value = response.value.data.data.name;
-    errorMessage.value = false;
-  } else {
-    errorMessage.value = response.value.message;
-  }
-  loading0.value = false;
-}
-
-async function handleUpdate() {
-  loading1.value = true;
-  successMessage.value = false;
-  errorMessage.value = false;
-
-  response.value = await categoryStore.updateCategory(id, { name: name.value }, authStore.token);
-
-  if (response.value.flag === 1) {
-    successMessage.value = true;
-    errorMessage.value = false;
-    router.push('/categoryList');
-  } else {
-    errorMessage.value = response.value.message;
-    successMessage.value = false;
-  }
-
-  loading1.value = false;
-}
-
-async function handleSubmit() {
-  if (props.isEditing) {
-
-    await handleUpdate();
-
-  } else {
-
-    await handleCreate();
-
-  }
-}
-
-async function handleCreate() {
-  loading1.value = true;
-  successMessage.value = false;
-  errorMessage.value = false;
-  response.value = await categoryStore.createCategory(name.value, authStore.token);
-  if (response.value.flag == 1) {
-    successMessage.value = true;
-    errorMessage.value = false;
-    router.push('/categoryList');
-  } else {
-    errorMessage.value = response.value.message;
-    successMessage.value = false;
-
-  }
-  loading1.value = false;
-}
 
 function closeModal() {
   router.push('/categoryList');

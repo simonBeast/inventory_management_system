@@ -1,20 +1,15 @@
 <template>
 
-  <div v-if="loading && !errorMessage" class="flex justify-center mt-10">
-    <span class="loading loading-spinner text-indigo-600"></span>
-  </div>
-
-
-  <transition  v-else-if="!errorMessage && authStore.isLoggedIn && authStore.isAdmin" name="fade-slide" appear>
+<span v-if="loading && !isError" class="block loading loading-spinner text-indigo-600 mt-8 mx-auto"></span>
+  <transition  v-else-if="!loading && !errorMessage && authStore.isLoggedIn && authStore.isAdmin" name="fade-slide" appear>
     <div
-     
       :class="containerClass"
       class="mt-8 mx-auto px-4 py-4 bg-white rounded-xl w-full max-w-7xl"
     >
       <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div class="flex flex-1 w-full md:w-auto gap-2">
           <input
-            v-model="searchTerm"
+            v-model="searchInput"
             type="text"
             placeholder="Search categories..."
             class="w-full md:w-64 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
@@ -50,7 +45,7 @@
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr
-              v-for="(item, index) in productCategoryStore.result"
+              v-for="(item, index) in productCategories?.data"
               :key="index"
               class="hover:bg-gray-50 transition"
             >
@@ -78,15 +73,13 @@
       </div>
 
       <pagination
-        :total-pages="pagination2.totalPages"
-        :current-page="pagination2.currentPage"
+        :total-pages="paginationData.totalPages"
+        :current-page="paginationData.currentPage"
         @page-changed="handlePageChange"
         class="mt-6"
       />
     </div>
   </transition>
-
-
   <transition name="fade">
     <p
       v-if="errorMessage"
@@ -114,25 +107,44 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, computed } from 'vue';
-import { useProductCategoryStore } from '../../store/productCategoryStore';
-import { useRouter } from 'vue-router';
+import { ref, defineProps, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../store/authStore';
-import pagination from '../../components/pagination.vue';
+import  pagination from '../../components/pagination.vue';
 import { useLanguageStore } from '../../store/languageStore';
+import { useDeleteProductCategory, useProductCategories } from '../../store/useProductCategory';
+import { useQueryClient } from '@tanstack/vue-query';
+
 const languageStore = useLanguageStore();
+
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
+const route = useRoute();
+
 const router = useRouter();
+
 let authStore = useAuthStore();
-let productCategoryStore = useProductCategoryStore();
-let response = ref("");
-let errorMessage = ref(false);
-let pagination2 = ref(productCategoryStore.pagination);
-let searchTerm = ref("");
-let loading = ref(true);
-let isSearch = ref(false);
+
+let searchInput = ref("");
+
+const errorMessage = ref(false);
+
+let page = ref(Number(route.query.page) || 1);
+
+const searchTerm = ref(route.query.search || '');
+
 let props = defineProps(['drawerOpen']);
+
+const queryClient = useQueryClient();
+
+const params = computed(() => ({
+  page: page.value,
+  limit: 10,
+  token: authStore.token,
+  searchTerm: searchTerm.value,
+}));
+
+const deleteProductCategoryMutation = useDeleteProductCategory(authStore.token);
 
 const containerClass = computed(() => ({
   'ml-56 md:ml-60 lg:ml-72 w-1/2': props.drawerOpen,
@@ -141,16 +153,19 @@ const containerClass = computed(() => ({
 
 let productIdToDelete = ref(null);
 
-onMounted(async () => {
-  response.value = await productCategoryStore.getProductCategories(authStore.token);
-  if (response.value.flag == 1) {
-    errorMessage.value = false;
-    loading.value = false;
+const {data:productCategories,isLoading:loading,isError,error} = useProductCategories(params);
+
+const paginationData = computed(() => productCategories.value?.pagination || null);
+
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
   } else {
-    errorMessage.value = response.value.message;
-    loading.value = false;
+    errorMessage.value = "";
   }
 });
+
 
 function openConfirmationModal(id) {
   productIdToDelete.value = id;
@@ -158,17 +173,22 @@ function openConfirmationModal(id) {
 }
 
 async function confirmDelete() {
-  if (productIdToDelete.value !== null) {
-    response.value = await productCategoryStore.deleteProductCategory(productIdToDelete.value, authStore.token);
-    if (response.value.flag == 1) {
-      errorMessage.value = '';
-      productCategoryStore.result = productCategoryStore.result.filter(item => item.id !== productIdToDelete.value);
-    } else {
-      errorMessage.value = response.value.message;
-    }
+    await deleteProductCategoryMutation.mutateAsync(productIdToDelete.value,{
+      onError:(e)=>{
+        errorMessage.value = e.message;
+        closeModal();
+      },
+      onSuccess:()=>{
+        queryClient.invalidateQueries(['product_categories']);
+        queryClient.invalidateQueries(['product_sub_categories']);
+        queryClient.invalidateQueries(['product_categories_alpha_no_limit']);
+        queryClient.invalidateQueries(["products_data"]);
+        closeModal();
+      }
+    });
+    
     productIdToDelete.value = null;
-  }
-  closeModal();
+    
 }
 
 function closeModal() {
@@ -176,38 +196,22 @@ function closeModal() {
 }
 
 async function handleSearch() {
-  if (searchTerm.value.trim()) {
-    loading.value = true;
-    response.value = await productCategoryStore.searchProductCategories(authStore.token, searchTerm.value);
-    if (response.value.flag == 1) {
-      errorMessage.value = false;
-      isSearch.value = true;
-    } else {
-      errorMessage.value = response.value.message;
+  if (searchInput.value.trim()) {
+   searchTerm.value = searchInput.value.trim();
+   page.value = 1; 
+   router.replace({
+    query: {
+      ...route.query,
+      search: searchTerm.value,
+      page: page.value,
     }
-    loading.value = false;
-  } else {
-    if (isSearch.value) {
-      response.value = await productCategoryStore.getProductCategories(authStore.token);
-      if (response.value.flag == 1) {
-        errorMessage.value = false;
-        loading.value = false;
-        isSearch.value = false;
-      } else {
-        errorMessage.value = response.value.message;
-        loading.value = false;
-      }
-    }
+   })
   }
 
 }
 
-async function handlePageChange(page) {
-  if(!isSearch.value){
-    await productCategoryStore.changePage(authStore.token, page);
-  }else{
-    await productCategoryStore.changePageBySearch(authStore.token, searchTerm.value, page);
-  }
+async function handlePageChange(page1) {
+ page.value = page1;
   
 }
 

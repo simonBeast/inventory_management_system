@@ -31,7 +31,7 @@
         </thead>
         <tbody class="text-sm text-gray-700">
           <tr
-            v-for="(item, index) in returnStore.result"
+            v-for="(item, index) in returns?.data"
             :key="index"
             class="border-t hover:bg-gray-50 transition"
           >
@@ -62,8 +62,8 @@
 
     <div class="mt-6">
       <pagination
-        :total-pages="pagination2.totalPages"
-        :current-page="pagination2.currentPage"
+        :total-pages="paginationData.totalPages"
+        :current-page="paginationData.currentPage"
         @page-changed="handlePageChange"
       />
     </div>
@@ -97,26 +97,25 @@
 
   
   <script setup>
-  import { ref, onMounted, defineProps, computed } from 'vue';
+  import { ref, defineProps, computed, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useAuthStore } from '../../store/authStore';
   import pagination from '../../components/pagination.vue';
   import { useReturnStore } from '../../store/returnStore';
   import { useLanguageStore } from '../../store/languageStore';
   import { convertReturnReasonToTigrigna, convertReturnStatusToTigrigna } from '../../util/utilFunctions';
+  import { useDeleteReturn, useReturns } from '../../store/useReturn';
+  import { useQueryClient } from '@tanstack/vue-query';
   const languageStore = useLanguageStore();
   const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
-  
+  const route = useRoute();
   const router = useRouter();
   let authStore = useAuthStore();
   let returnStore = useReturnStore();
-  let response = ref("");
-  let errorMessage = ref(false);
-  let pagination2 = ref(returnStore.pagination);
-  let loading = ref(true);
-  const route = useRoute();
+  let page = ref(Number(route.query.page) || 1);
   let props = defineProps(['drawerOpen']);
+  const errorMessage = ref(false);
   
   const containerClass = computed(() => ({
     'ml-56 md:ml-60 lg:ml-72 w-1/2': props.drawerOpen,
@@ -124,20 +123,29 @@
   }));
   
   let returnIdToDelete = ref(null);
-  
-  onMounted(async () => {
-    response.value = await returnStore.getReturns(authStore.token);
-    if (response.value.flag == 1) {
-      errorMessage.value = false;
-      returnStore.pagination.currentPage = Number(route.query.page) || 1;
-      if(!returnStore.pagination.currentPage !== 1){
-         await returnStore.changePage(authStore.token, returnStore.pagination.currentPage);
-      }
-    } else {
-      errorMessage.value = response.value.message;
-    }
-    loading.value = false;
-  });
+
+  const params = computed(() => ({
+    page: page.value,
+    limit: 10,
+    token: authStore.token,
+  }));
+
+  const queryClient = useQueryClient();
+
+  const {isLoading:loading,data: returns,isError,error} = useReturns(params);
+
+  const paginationData = computed(() => returns.value?.pagination || null);
+
+ 
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
+  } else {
+    errorMessage.value = "";
+  }
+});
+
+  const deleteReturnMutation = useDeleteReturn(authStore.token); 
   
   function openConfirmationModal(id) {
     returnIdToDelete.value = id;
@@ -145,16 +153,14 @@
   }
   
   async function confirmDelete() {
-    if (returnIdToDelete.value !== null) {
-      response.value = await returnStore.deleteReturn(returnIdToDelete.value, authStore.token);
-      if (response.value.flag == 1) {
-        errorMessage.value = '';
-        returnStore.result = returnStore.result.filter(item => item.id !== returnIdToDelete.value);
-      } else {
-        errorMessage.value = response.value.message;
-      }
-      returnIdToDelete.value = null;
-    }
+   
+      await deleteReturnMutation.mutateAsync(returnIdToDelete.value,{
+        onSuccess:()=>{
+          queryClient.invalidateQueries(['returns']);
+          queryClient.invalidateQueries(['products']);
+          queryClient.invalidateQueries(["products_data"]);
+        },
+      }) 
     closeModal();
   }
   
@@ -162,8 +168,8 @@
     document.getElementById('deleteModal').close();
   }
   
-  async function handlePageChange(page) {
-    await returnStore.changePage(authStore.token, page);
+  async function handlePageChange(page1) {
+    page.value = page1;
   }
   
   async function handleUpdate(item) {

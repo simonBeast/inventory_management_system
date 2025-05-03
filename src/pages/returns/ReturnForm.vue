@@ -1,7 +1,7 @@
 <template>
 
     <span
-      v-if="loading0 && !errorMessage"
+      v-if="isLoadingReturn && !errorMessage"
       class="block loading loading-spinner text-primary mt-6 mx-auto"
     ></span>
 
@@ -135,23 +135,20 @@
   
 
 <script setup>
-
-import { ref, onMounted, defineProps, computed} from 'vue';
+import { ref, onMounted, defineProps, computed, watch} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useReturnStore } from '../../store/returnStore';
-import { useProductStore } from '../../store/productStore';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useCreateReturn,useReturn, useUpdateReturn } from '../../store/useReturn';
+import { useQueryClient } from '@tanstack/vue-query';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
-
 const authStore = useAuthStore();
 const returnStore = useReturnStore();
-const productStore = useProductStore();
 const route = useRoute();
 const router = useRouter();
-const productList = ref([]);
 const formData = ref({
     saleId: null,
     quantityReturned: 0,
@@ -159,37 +156,36 @@ const formData = ref({
     returnStatus: null,
     description: null,
 });
-const response = ref("");
+
 const errorMessage = ref(false);
 const successMessage = ref(false);
 const returnId = route.params.id;
 let props = defineProps(['drawerOpen',"isEditing"]);
-let loading0 = ref(props.isEditing ? true : false);
 let loading1 = ref(false);
 
+const {isLoading: isLoadingReturn, data: returnData,isError: isErrorReturn, error: returnError} = useReturn(returnId,authStore.token);
 
+watch(returnData,()=>{
+
+if(returnData.value && props.isEditing){
+  formData.value =  {
+    saleId: returnData.value.saleId,
+    quantityReturned: returnData.value.quantityReturned,
+    reason: returnData.value.reason,
+    returnStatus: returnData.value.returnStatus,
+    description: returnData.value.description,
+  }
+}
+
+},{immediate:true});
 
 const containerClass = computed(() => ({
     'ml-56 md:ml-60 lg:ml-72 w-1/2': props.drawerOpen,
     'ml-8 w-full': !props.drawerOpen
 }));
-onMounted(async () => {
-
-    if(props.isEditing){
-        await fetchReturns();
-    }
-
-});
-
-async function fetchReturns(){
-    response.value = await returnStore.getReturn(authStore.token, returnId);
-    if (response.value.flag == 1) {
-        formData.value = response.value.data.data;
-    } else {
-        errorMessage.value = response.value.message;
-    }
-    loading0.value = false;
-}
+const updateReturnMutation = useUpdateReturn(authStore.token);
+const createReturnMutation = useCreateReturn(authStore.token);
+const queryClient = useQueryClient();
 async function handleSubmit(){
 
     if(props.isEditing){
@@ -212,17 +208,22 @@ async function handleCreate(){
     if(!formData.value.description){
         formData.value.description = null; 
     }
-    
-    response.value = await returnStore.createReturn(formData.value, authStore.token);
-    if (response.value.flag == 1) {
+    await createReturnMutation.mutateAsync(formData.value,{
+      onSuccess:()=>{
+        queryClient.invalidateQueries(['returns']);
+        queryClient.invalidateQueries(['products']);
+        queryClient.invalidateQueries(["products_data"]);
         successMessage.value = true;
-        errorMessage.value = false;
-        router.push(`/returnList?page=${returnStore.pagination.currentPage}`);
-    } else {
-        errorMessage.value = response.value.message;
-        successMessage.value = false;
-    }
-    loading1.value = false;
+      },
+      onError:(e)=>{
+        errorMessage.value = e.message;
+      },
+      onSettled:()=>{
+        loading1.value = false;
+      }
+    });
+
+    
 }
 async function handleUpdate() {
     loading1.value = true;
@@ -237,23 +238,27 @@ async function handleUpdate() {
     if(!formData.value.description){
         formData.value.description = null; 
     }
-    response.value = await returnStore.updateReturn(returnId, {
+    await updateReturnMutation.mutateAsync({id:returnId,data:{
         saleId: formData.value.saleId,
         quantityReturned: formData.value.quantityReturned,
         reason: formData.value.reason,
         returnStatus: formData.value.returnStatus,
         description: formData.value.description
-    }, authStore.token);
-    if (response.value.flag == 1) {
+    }},{
+      onSuccess:()=>{
+        queryClient.invalidateQueries(['returns']);
+        queryClient.invalidateQueries(['returns',returnId]);
+        queryClient.invalidateQueries(['products']);
+        queryClient.invalidateQueries(["products_data"]);
         successMessage.value = true;
-        errorMessage.value = false;
+      },
+      onError:(e)=>{
+        errorMessage.value = e.message;
+      },
+      onSettled:()=>{
         loading1.value = false;
-        router.push(`/returnList?page=${returnStore.pagination.currentPage}`);
-    } else {
-        errorMessage.value = response.value.message;
-        successMessage.value = false;
-    }
-    loading1.value = false;
+      }
+    });
 }
 
 function closeModal() {

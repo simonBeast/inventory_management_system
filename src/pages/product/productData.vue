@@ -23,7 +23,7 @@
       </thead>
       <tbody class="divide-y divide-gray-200 bg-white">
         <tr
-          v-for="(product, index) in productStore.productData"
+          v-for="(product, index) in productData"
           :key="index"
           class="hover:bg-indigo-50 transition-colors"
         >
@@ -58,19 +58,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, computed } from 'vue';
+
+import { defineProps, computed, watch } from 'vue';
 import { useAuthStore } from '../../store/authStore';
-import { useProductStore } from '../../store/productStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useProductsData } from '../../store/useProduct';
+import { ref } from 'vue';
 
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
-
-const authStore = useAuthStore();
-const productStore = useProductStore();
-const response = ref("");
 const errorMessage = ref(false);
-const loading = ref(true);
+const authStore = useAuthStore();
 
 const props = defineProps(['drawerOpen']);
 
@@ -78,15 +76,17 @@ const containerClass = computed(() => ({
   'ml-56 md:ml-60 lg:ml-72': props.drawerOpen,
   'ml-8': !props.drawerOpen,
 }));
-onMounted(async () => {
-  response.value = await productStore.getProductData(authStore.token);
-  if (response.value.flag === 1) {
-    errorMessage.value = false;
+const {isLoading:loading,data:productData,isError,error} = useProductsData(authStore.token);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
   } else {
-    errorMessage.value = response.value.message;
+    errorMessage.value = "";
   }
-  loading.value = false;
 });
+
+
 </script>
 
 <style scoped>

@@ -72,12 +72,12 @@
             <td class="py-3 px-4">{{ (sale.quantity * sale.salePricePerUnit) }} Birr</td>
             <td class="py-3 px-4">{{ sale.createdAt.substring(0, sale.createdAt.indexOf("T")) }}</td>
             <td class="px-4 py-3 space-x-2 whitespace-nowrap">
-              <button @click="openConfirmationModal(item.id)"
+              <button @click="handleDelete(sale.id)"
                 class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition">
                 <font-awesome-icon icon="trash" class="w-3.5 h-3.5" />
                 {{isLanguageTigrigna ? "ኣጥፍእ":"Delete"}}
               </button>
-              <button @click="handleUpdate(item)"
+              <button @click="handleUpdate(sale)"
                 class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white transition">
                 <font-awesome-icon icon="pen" class="w-3.5 h-3.5" />
                 {{isLanguageTigrigna ? "ኣዐርይ":"Edit"}}
@@ -132,6 +132,7 @@ import { useSaleStore } from '../../store/saleStore';
 import { useProductStore } from '../../store/productStore';
 import { useUserStore } from '../../store/userStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useQueryClient } from '@tanstack/vue-query';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
@@ -187,11 +188,16 @@ async function handleDelete(id) {
   saleIdToDelete.value = id;
   document.getElementById('deleteModal').showModal();
 }
-
+const queryClient = useQueryClient();
 async function confirmDelete() {
   if (saleIdToDelete.value !== null) {
     response.value = await saleStore.deleteSale(saleIdToDelete.value, authStore.token);
     if (response.value.flag == 1) {
+      queryClient.invalidateQueries(['products']);
+      queryClient.invalidateQueries(["products_data"]);
+      queryClient.invalidateQueries(['top_products_month']);
+      queryClient.invalidateQueries(['top_products_quarter']);
+      queryClient.invalidateQueries(['top_products_year']);
       errorMessage.value = '';
       saleStore.result = saleStore.result.filter(item => item.id !== saleIdToDelete.value);
     } else {

@@ -89,6 +89,7 @@ import { useSaleStore } from '../../store/saleStore';
 import { useRouter, useRoute } from 'vue-router';
 import CustomDropdown from '../../components/dropDownSale.vue';
 import { useLanguageStore } from '../../store/languageStore';
+import { useQueryClient } from '@tanstack/vue-query';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
@@ -171,6 +172,7 @@ async function handleSubmit(){
         
     }
 }
+const queryClient = useQueryClient();
 async function handleCreate(){
 
     loading1.value = true;
@@ -182,6 +184,11 @@ async function handleCreate(){
         formData.value.sellerId = authStore.user.id;
         let response = await saleStore.createSale(formData.value, authStore.token);
         if (response.flag == 1) {
+          queryClient.invalidateQueries(['products']);
+          queryClient.invalidateQueries(["products_data"]);
+          queryClient.invalidateQueries(['top_products_month']);
+          queryClient.invalidateQueries(['top_products_quarter']);
+          queryClient.invalidateQueries(['top_products_year']);
             successMessage.value = true;
             errorMessage.value = false;
            
@@ -209,6 +216,11 @@ async function handleUpdate() {
             salePricePerUnit: formData.value.salePricePerUnit
         }, authStore.token)
         if (response.flag == 1) {
+          queryClient.invalidateQueries(['products']);
+          queryClient.invalidateQueries(["products_data"]);
+          queryClient.invalidateQueries(['top_products_month']);
+          queryClient.invalidateQueries(['top_products_quarter']);
+          queryClient.invalidateQueries(['top_products_year']);
             successMessage.value = true;
             errorMessage.value = false;
             loading1.value = false;

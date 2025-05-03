@@ -9,10 +9,10 @@
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
       <div class="flex flex-1 gap-2 w-full sm:w-auto">
         <input
-          v-model="searchTerm"
+          v-model="searchInput"
           type="text"
           placeholder="Search products..."
-          class="w-full sm:w-64 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+          class="w-full sm:w-64 px-3 py-2 rounded-md border border-gray-300 outline-none"
         />
         <button
           @click="handleSearch"
@@ -23,15 +23,15 @@
       </div>
       <router-link
         to="/product"
-        class="inline-block px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition duration-200 shadow-sm"
+        class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-600 transition duration-200 shadow-sm"
       >
         + Create Product
       </router-link>
     </div>
 
     <div class="overflow-x-auto bg-white shadow rounded-md">
-      <table class="min-w-full divide-y divide-gray-200 table-auto">
-        <thead class="bg-gray-100">
+      <table class="min-w-full divide-gray-200 table-auto">
+        <thead class="bg-gray-100 h-auto">
           <tr>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600">#</th>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600">{{isLanguageTigrigna ? "ስም ኣቕሓ":"Product Name"}}</th>
@@ -43,7 +43,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr v-for="(item, index) in productStore.result" :key="item.id" class="hover:bg-gray-50 transition">
+          <tr v-for="(item, index) in products?.data" :key="item.id" class="hover:bg-gray-50 transition">
             <td class="px-4 py-2">{{ index + 1 }}</td>
             <td class="px-4 py-2">{{ item.productName }}</td>
             <td class="px-4 py-2">{{ item.productCode }}</td>
@@ -72,7 +72,7 @@
     </div>
 
     <div class="mt-6">
-      <pagination :total-pages="pagination2.totalPages" :current-page="pagination2.currentPage" @page-changed="handlePageChange" />
+      <pagination :total-pages="paginationData.totalPages" :current-page="paginationData.currentPage" @page-changed="handlePageChange" />
     </div>
   </div>
 
@@ -98,28 +98,38 @@
 
 
 <script setup>
-import { ref, onMounted, defineProps, computed } from 'vue';
-import { useProductStore } from '../../store/productStore';
+
+import { ref, defineProps, computed, watch } from 'vue';
 import { useRouter,useRoute } from 'vue-router';
 import { useAuthStore } from '../../store/authStore';
 import pagination from '../../components/pagination.vue';
 import { useLanguageStore } from '../../store/languageStore';
+import { useQueryClient } from '@tanstack/vue-query';
+import { useDeleteProduct, useProducts } from '../../store/useProduct';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
-
 
 const route = useRoute();
 const router = useRouter();
 let authStore = useAuthStore();
-let productStore = useProductStore();
-let response = ref("");
-let errorMessage = ref(false);
-let searchTerm = ref("");
-let isSearch = ref(false)
-let pagination2 = ref(productStore.pagination);
-let loading = ref(true);
+let searchInput = ref("");
+let errorMessage = ref("");
+
+let page = ref(Number(route.query.page) || 1);
+
+const searchTerm = ref(route.query.search || '');
 
 let props = defineProps(['drawerOpen']);
+
+
+const queryClient = useQueryClient();
+
+const params = computed(() => ({
+  page: page.value,
+  limit: 10,
+  token: authStore.token,
+  searchTerm: searchTerm.value,
+}));
 
 const containerClass = computed(() => ({
   'ml-56 md:ml-60 lg:ml-72': props.drawerOpen,
@@ -128,80 +138,73 @@ const containerClass = computed(() => ({
 
 let productIdToDelete = ref(null);
 
-onMounted(async () => {
-  response.value = await productStore.getProducts(authStore.token);
-  console.log(productStore.pagination);
-  if (response.value.flag == 1) {
-    errorMessage.value = false;
-    productStore.pagination.currentPage = Number(route.query.page) || 1;
-    if(! productStore.pagination.currentPage !== 1){
-         await productStore.changePage(authStore.token,  productStore.pagination.currentPage);
-      }
+const {isLoading:loading, data:products ,isError,error} = useProducts(params);
+
+const paginationData = computed(() => products.value?.pagination || null);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
   } else {
-    errorMessage.value = response.value.message;
+    errorMessage.value = "";
   }
-  loading.value = false;
 });
 
+const deleteProductMutation = useDeleteProduct(authStore.token);
 function openConfirmationModal(id) {
   productIdToDelete.value = id;
   document.getElementById('deleteModal').showModal();
 }
 
 async function confirmDelete() {
-  if (productIdToDelete.value !== null) {
-    response.value = await productStore.deleteProduct(productIdToDelete.value, authStore.token);
-    if (response.value.flag == 1) {
-      errorMessage.value = '';
-      productStore.result = productStore.result.filter(item => item.id !== productIdToDelete.value);
-    } else {
-      errorMessage.value = response.value.message;
-    }
+  
+    await deleteProductMutation.mutateAsync(productIdToDelete.value,{
+      onSuccess:()=>{
+        queryClient.invalidateQueries(['products']);
+        queryClient.invalidateQueries(['returns']);
+        queryClient.invalidateQueries(['top_products_month']);
+        queryClient.invalidateQueries(['top_products_quarter']);
+        queryClient.invalidateQueries(['top_products_year']);
+        queryClient.invalidateQueries(["products_alpha_no_limit"]);
+        queryClient.invalidateQueries(["products_data"]);
+        queryClient.invalidateQueries(["transaction_history"]);
+        queryClient.invalidateQueries(['products', id]);
+      },
+      onError:(e)=>{
+        errorMessage.value = e.message;
+      }
+    })
     productIdToDelete.value = null;
-  }
-  closeModal();
+    closeModal();
+  
 }
 
 function closeModal() {
   document.getElementById('deleteModal').close();
 }
 
-async function handlePageChange(page) {
-  if(!isSearch.value){
-    await productStore.changePage(authStore.token, page);
-  }else{
-    await productStore.changePageBySearch(authStore.token, searchTerm.value, page);
-  }
+async function handlePageChange(page1) {
+ page.value = page1;
 }
 
 async function handleSearch() {
-  if (searchTerm.value.trim()) {
-    loading.value = true;
-    response.value = await productStore.searchProducts(authStore.token, searchTerm.value);
-    if (response.value.flag == 1) {
-      errorMessage.value = false;
-      isSearch.value = true;
-    } else {
-      errorMessage.value = response.value.message;
+  if (searchInput.value.trim()) {
+   searchTerm.value = searchInput.value.trim();
+   page.value = 1; 
+   router.replace({
+    query: {
+      ...route.query,
+      search: searchTerm.value,
+      page: page.value,
     }
-    loading.value = false;
-  } else {
-    if (isSearch.value) {
-      response.value = await productStore.getProducts(authStore.token);
-      if (response.value.flag == 1) {
-        errorMessage.value = false;
-        isSearch.value = false;
-      } else {
-        errorMessage.value = response.value.message;
-      }
-      loading.value = false;
-    }
+  })
   }
 
 }
 
 async function handleUpdate(item) {
-  router.push(`/editProduct/${item.id}?page=${productStore.pagination.currentPage}`);
+  //?page=${route.query?.page
+  router.push(`/editProduct/${item.id}`);
 }
 
 async function displayProduct(id) {

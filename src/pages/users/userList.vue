@@ -7,15 +7,14 @@
     :class="containerClass"
     class="mx-auto ml-56 md:ml-60 lg:ml-72 w-4/5 mr-2 overflow-x-auto mt-10"
   >
-
     <div class="flex flex-col md:flex-row justify-between items-center mb-4">
    
       <div class="flex w-full md:w-2/3 mb-2 md:mb-0">
         <input
-          v-model="searchTerm"
+          v-model="searchInput"
           type="text"
           placeholder="Search users..."
-          class="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none  "
+          class="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none "
         />
         <button
           @click="handleSearch"
@@ -48,7 +47,7 @@
         </thead>
         <tbody class="divide-y divide-gray-200 text-gray-700">
           <tr
-            v-for="(user, index) in userStore.result"
+            v-for="(user, index) in users?.data"
             :key="index"
             class="hover:bg-gray-50 transition"
           >
@@ -74,8 +73,8 @@
     </div>
 
     <pagination
-      :total-pages="pagination2.totalPages"
-      :current-page="pagination2.currentPage"
+      :total-pages="paginationData.totalPages"
+      :current-page="paginationData.currentPage"
       @page-changed="handlePageChange"
       class="mt-4"
     />
@@ -100,27 +99,29 @@
     </div>
   </dialog>
 </template>
-
-
 <script setup>
-import { ref, onMounted, defineProps, computed } from 'vue';
-import { useRouter } from 'vue-router';
+
+import { ref,defineProps, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../store/authStore';
 import pagination from '../../components/pagination.vue';
-import { useUserStore } from '../../store/userStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useDeleteUser,useUsers } from '../../store/useUser';
+import { useQueryClient } from '@tanstack/vue-query';
+
 const languageStore = useLanguageStore();
+
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
 const router = useRouter();
+const route = useRoute();
 let authStore = useAuthStore();
-let userStore = useUserStore();
-let response = ref("");
-let errorMessage = ref(false);
-let pagination2 = ref(userStore.pagination);
-let searchTerm = ref("");
-let isSearch = ref(false);
-let loading = ref(true);
+const errorMessage = ref(false);
+let searchInput = ref("");
+
+let page = ref(Number(route.query.page) || 1);
+
+const searchTerm = ref(route.query.search || '');
 
 let props = defineProps(['drawerOpen']);
 
@@ -131,15 +132,23 @@ const containerClass = computed(() => ({
 
 let userIdToDelete = ref(null);
 
-onMounted(async () => {
-  response.value = await userStore.getUsers(authStore.token);
-  console.log(userStore.result.length);
-  if (response.value.flag == 1) {
-    errorMessage.value = false;
+const params = computed(() => ({
+  page: page.value,
+  limit: 10,
+  token: authStore.token,
+  searchTerm: searchTerm.value,
+}));
+
+const { isLoading:loading , data:users , isError, error} = useUsers(params);
+
+const paginationData = computed(() => users.value?.pagination || null);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
   } else {
-    errorMessage.value = response.value.message;
+    errorMessage.value = "";
   }
-  loading.value = false;
 });
 
 function openConfirmationModal(id) {
@@ -147,17 +156,22 @@ function openConfirmationModal(id) {
   document.getElementById('deleteModal').showModal();
 }
 
+const deleteUserMutation = useDeleteUser(authStore.token);
+
+const queryClient = useQueryClient();
+
 async function confirmDelete() {
-  if (userIdToDelete.value !== null) {
-    response.value = await userStore.deleteUser(userIdToDelete.value, authStore.token);
-    if (response.value.flag == 1) {
-      errorMessage.value = '';
-      userStore.result = userStore.result.filter(item => item.id !== userIdToDelete.value);
-    } else {
-      errorMessage.value = response.value.message;
-    }
+ 
+   await deleteUserMutation.mutateAsync(userIdToDelete.value,{
+    onSuccess:()=>{
+      queryClient.invalidateQueries(['users']);
+    },
+    onError:(e)=>{
+      errorMessage.value = e.message;
+    },
+   })
     userIdToDelete.value = null;
-  }
+
   closeModal();
 }
 
@@ -166,39 +180,22 @@ function closeModal() {
 }
 
 async function handleSearch() {
-  if (searchTerm.value.trim()) {
-    loading.value = true;
-    response.value = await userStore.searchUsers(authStore.token, searchTerm.value);
-    if (response.value.flag == 1) {
-      errorMessage.value = false;
-      isSearch.value = true;
-    } else {
-      errorMessage.value = response.value.message;
-    }
-    loading.value = false;
-  }
-  else {
-    if (isSearch.value) {
-      response.value = await userStore.getUsers(authStore.token);
-      if (response.value.flag == 1) {
-        errorMessage.value = false;
-        isSearch.value = false;
-      } else {
-        errorMessage.value = response.value.message;
+  if (searchInput.value.trim()) {
+      page.value = 1;
+      searchTerm.value = searchInput.value.trim();
+      router.replace({
+      query: {
+        ...route.query,
+        search: searchTerm.value,
+        page: page.value,
       }
-      loading.value = false;
-    }
-
+   });
   }
 
 }
 
-async function handlePageChange(page) {
-  if(!isSearch.value){
-    await userStore.changePage(authStore.token, page);
-  }else{
-    await userStore.changePageBySearch(authStore.token, searchTerm.value, page);
-  }
+async function handlePageChange(page1) {
+  page.value = page1;
 }
 
 async function handleUpdate(user) {

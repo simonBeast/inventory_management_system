@@ -1,6 +1,6 @@
 <template>
     
-    <span v-if="loading && !errorMessage" class="block loading loading-spinner text-indigo-600 mt-6 mx-auto"></span>
+    <span v-if="isLoading && !errorMessage" class="block loading loading-spinner text-indigo-600 mt-6 mx-auto"></span>
 
     <div
       v-else-if="!errorMessage && authStore.isLoggedIn && authStore.isAdmin"
@@ -23,7 +23,7 @@
           </thead>
           <tbody class="text-sm text-gray-700">
             <tr
-              v-for="(transaction, index) in transactionStore.result"
+              v-for="(transaction, index) in transactions?.data"
               :key="index"
               class="border-t hover:bg-gray-50 transition"
             >
@@ -42,8 +42,8 @@
   
       <div class="mt-6">
         <pagination
-          :total-pages="pagination2.totalPages"
-          :current-page="pagination2.currentPage"
+          :total-pages="paginationData.totalPages"
+          :current-page="paginationData.currentPage"
           @page-changed="handlePageChange"
         />
       </div>
@@ -60,21 +60,31 @@
   
 
 <script setup>
-import { ref, onMounted,defineProps, computed, } from 'vue';
+import { ref,defineProps, computed, watch, } from 'vue';
 import { useAuthStore } from '../../store/authStore';
 import { convertReturnReasonToTigrigna } from '../../util/utilFunctions';
 import pagination from '../../components/pagination.vue';
-import { useTransactionHistoryStore } from '../../store/transactionStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useTransactionHistory } from '../../store/useTransactionHistory';
+import { useRoute } from 'vue-router';
+
 const languageStore = useLanguageStore();
+
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
 let authStore = useAuthStore();
-let transactionStore = useTransactionHistoryStore();
-let response = ref("");
-let errorMessage = ref(false);
-let pagination2 = ref(transactionStore.pagination);
-let loading = ref(true);
+
+const errorMessage = ref(false);
+
+let route = useRoute();
+
+let page = ref(Number(route.query.page) || 1);
+
+const params = computed(() => ({
+  page: page.value,
+  limit: 10,
+  token: authStore.token,
+}));
 
 let props = defineProps(['drawerOpen']);
 
@@ -83,19 +93,20 @@ const containerClass = computed(() => ({
     'ml-8 w-full': !props.drawerOpen
 }));
 
- 
-onMounted(async () => {
-    response.value = await transactionStore.getTransactionHistories(authStore.token);
-    if (response.value.flag == 1) {
-        errorMessage.value = false;
-    } else {
-        errorMessage.value = response.value.message;
-    }
-    loading.value =  false;
+const {isLoading, data:transactions ,isError,error} = useTransactionHistory(params);
+
+const paginationData = computed(()=>transactions.value?.pagination || null);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
+  } else {
+    errorMessage.value = "";
+  }
 });
 
-async function handlePageChange(page) {
-    await transactionStore.changePage(authStore.token, page);
+async function handlePageChange(page1) {
+    page.value = page1;
 }
 </script>
 

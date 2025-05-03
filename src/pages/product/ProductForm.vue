@@ -1,6 +1,6 @@
 <template>
    
-    <span v-if="loading0 && !errorMessage" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
+    <span v-if="(isLoadingProduct && !errorMessage) || isLoadingAlpha" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
   
     <div
       v-else-if="authStore.isLoggedIn && authStore.isAdmin"
@@ -50,7 +50,7 @@
 
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700">{{isLanguageTigrigna ? "ንኡስ ምድብ ኣቕሓ":"Product Sub Category"}}</label>
-            <CustomDropdown v-model="formData.productSubCategoryId" :list="productSubCategoryList" required class="mt-1"/>
+            <CustomDropdown v-model="formData.productSubCategoryId" :list="productSubCategoriesAlphaNoLimit" required class="mt-1"/>
           </div>
 
           <div>
@@ -176,22 +176,22 @@
   </template>
   
 <script setup>
-import { ref, onMounted, defineProps, computed, } from 'vue';
+import { ref, defineProps, computed, watch, } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProductStore } from '../../store/productStore';
 import { useProductSubCategoryStore } from '../../store/productSubCategoryStore';
 import { useAuthStore } from '../../store/authStore';
 import CustomDropdown from '../../components/dropDown.vue';
 import { useLanguageStore } from '../../store/languageStore';
+import { useProductSubCategoryAlphaNoLimit } from '../../store/useProductSubCategory';
+import { useAddNewStock, useCreateProduct, useProduct, useUpdateProduct } from '../../store/useProduct';
+import { useQueryClient } from '@tanstack/vue-query';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
-
 let authStore = useAuthStore();
 const productStore = useProductStore();
-const productSubCategoryStore = useProductSubCategoryStore();
 let route = useRoute();
 let router = useRouter();
-let productSubCategoryList = ref([]);
 let formData = ref({
     productName: null,
     productCode: null,
@@ -206,68 +206,38 @@ let newStock = ref({
     pricePerUnit: null,
     quantity: null,
 });
-let response = ref("");
 let errorMessage = ref(false);
 let successMessage = ref(false);
 let props = defineProps(['drawerOpen','isEditing']);
-let loading0 = ref( props.isEditing ? true : false );
 let loading1 = ref(false);
 let id = route.params.id;
-
-
 
 const containerClass = computed(() => ({
     'ml-56 md:ml-60 lg:ml-72': props.drawerOpen,
     'ml-8': !props.drawerOpen
 }));
 
-onMounted(async () => {
-   if(props.isEditing){
+const {isLoading: isLoadingAlpha,data: productSubCategoriesAlphaNoLimit,isError: isAlphaError, error: alphaError} = useProductSubCategoryAlphaNoLimit(authStore.token);
 
-    await fetchProducts();
+const {isLoading: isLoadingProduct, data: product,isError: isErrorProduct, error: productError} = useProduct(id,authStore.token);
 
-   }else{
-
-    await fetchProductSubCategoriesOnCreate();
-
-   }
-});
-
-async function fetchProducts(){
-    response.value = await productStore.getProduct(authStore.token, id);
-    if (response.value.flag == 1) {
-        errorMessage.value = false;
-        formData.value = response.value.data.data;
-        if (response.value.data.data.ProductDetail) {
-            formData.value.availableQuantity = response.value.data.data.ProductDetail.availableQuantity;
-            formData.value.minimumStockLevel = response.value.data.data.ProductDetail.minimumStockLevel;
-        }
-        if (productSubCategoryStore.alphaNoLimit.length == 0) {
-            response.value = await productSubCategoryStore.getProductSubCategoriesAlphaNoLimit(authStore.token);
-            if (response.value.flag == 1) {
-                errorMessage.value = false;
-            } else {
-                errorMessage.value = response.value.message;
-            }
-        }
-       
-        productSubCategoryList.value = productSubCategoryStore.alphaNoLimit;
-    } else {
-        errorMessage.value = response.value.message;
+watch(product,()=>{
+  if(product.value && props.isEditing){
+    formData.value =  {
+      productName: product.value.productName,
+      productCode: product.value.productCode,
+      productSubCategoryId: product.value.productSubCategoryId,
+      measurementUnit: product.value.measurementUnit,
+      pricePerUnit: product.value.pricePerUnit,
+      productDescription: product.value.productDescription,
+      availableQuantity: product.value.ProductDetail.availableQuantity,
+      minimumStockLevel: product.value.ProductDetail.minimumStockLevel,
     }
-    loading0.value = false;
-}
-async function fetchProductSubCategoriesOnCreate(){
-    if (productSubCategoryStore.alphaNoLimit.length == 0) {
-            response.value = await productSubCategoryStore.getProductSubCategoriesAlphaNoLimit(authStore.token);
-            if (response.value.flag == 1) {
-                errorMessage.value = false;
-            } else {
-                errorMessage.value = response.value.message;
-            }
-            productSubCategoryList.value = productSubCategoryStore.alphaNoLimit;
-        }
-}
+  }
+},{immediate:true});
+
+
+
 async function handleSubmit(){
 
     if(props.isEditing){
@@ -280,8 +250,16 @@ async function handleSubmit(){
 
     }
 
-
 }
+
+const createProductMutation = useCreateProduct(authStore.token);
+
+const updateProductMutation = useUpdateProduct(authStore.token);
+
+const addNewStockMutation = useAddNewStock(authStore.token);
+
+const queryClient = useQueryClient();
+
 async function handleCreate(){
     loading1.value = true;
     successMessage.value = false;
@@ -295,18 +273,27 @@ async function handleCreate(){
     if (!formData.value.productSubCategoryId) {
         errorMessage.value = "product sub category can't be empty";
     } else {
-        response.value = await productStore.createProduct(formData.value, authStore.token);
-        if (response.value.flag == 1) {
+        await createProductMutation.mutateAsync(formData.value,{
+          onSuccess: ()=>{
+            queryClient.invalidateQueries(['products']);
+            queryClient.invalidateQueries(['returns']);
+            queryClient.invalidateQueries(['top_products_month']);
+            queryClient.invalidateQueries(['top_products_quarter']);
+            queryClient.invalidateQueries(['top_products_year']);
+            queryClient.invalidateQueries(["products_alpha_no_limit"]);
+            queryClient.invalidateQueries(["products_data"]);
+            queryClient.invalidateQueries(["transaction_history"]);
             successMessage.value = true;
-            errorMessage.value = false;
-           
-            router.push(`/productList?page=${productStore.pagination.currentPage}`);
-        } else {
-            errorMessage.value = response.value.message;
-            successMessage.value = false;
-        }
+          },
+          onError: (e)=>{
+            errorMessage.value = e.message;
+          },
+          onSettled: ()=>{
+            loading1.value = false;
+          }
+        });
     }
-    loading1.value = false;
+    
 }
 async function handleUpdate() {
     loading1.value = true;
@@ -321,30 +308,29 @@ async function handleUpdate() {
     if (!formData.value.productSubCategoryId) {
         errorMessage.value = "product sub category can't be empty";
     } else {
-        response.value = await productStore.updateProduct(id, {
-            productName: formData.value.productName,
-            productCode: formData.value.productCode,
-            productSubCategoryId: formData.value.productSubCategoryId,
-            measurementUnit: formData.value.measurementUnit,
-            pricePerUnit: formData.value.pricePerUnit,
-            productDescription: formData.value.productDescription,
-            availableQuantity: formData.value.availableQuantity,
-            minimumStockLevel: formData.value.minimumStockLevel,
-        }, authStore.token);
-        if (response.value.flag == 1) {
+      await updateProductMutation.mutateAsync({id:id,data:formData.value},{
+          onSuccess: ()=>{
+            queryClient.invalidateQueries(['products']);
+            queryClient.invalidateQueries(['returns']);
+            queryClient.invalidateQueries(['top_products_month']);
+            queryClient.invalidateQueries(['top_products_quarter']);
+            queryClient.invalidateQueries(['top_products_year']);
+            queryClient.invalidateQueries(["products_alpha_no_limit"]);
+            queryClient.invalidateQueries(["products_data"]);
+            queryClient.invalidateQueries(["transaction_history"]);
+            queryClient.invalidateQueries(['products',id]);
             successMessage.value = true;
-            errorMessage.value = false;
+          },
+          onError: (e)=>{
+            errorMessage.value = e.message;
+          },
+          onSettled: ()=>{
             loading1.value = false;
-            router.push(`/productList?page=${route.query.page}`);
-        } else {
-            errorMessage.value = response.value.message;
-            successMessage.value = false;
-
-        }
-
-        loading1.value = false;
+          }
+        });
+       
     }
-    loading1.value = false;
+
 }
 async function handleAddNewStock() {
     loading1.value = true;
@@ -353,29 +339,27 @@ async function handleAddNewStock() {
     if (!newStock.value.pricePerUnit) {
         newStock.value.pricePerUnit = null
     }
-    if (!newStock.value.availableQuantity) {
-        newStock.value.availableQuantity = null
+    if (!newStock.value.quantity) {
+        newStock.value.quantity = null
     }
-    if (!newStock.value.pricePerUnit && !newStock.value.availableQuantity) {
+    if (!newStock.value.pricePerUnit && !newStock.value.quantity) {
         errorMessage.value = "quantity and price per unit can't be empty";
     } else {
-        response.value = await productStore.addNewStock(id, {
-            pricePerUnit: newStock.value.pricePerUnit,
-            quantity: newStock.value.quantity,
-
-        }, authStore.token);
-        if (response.value.flag == 1) {
-            errorMessage.value = false;
+      await addNewStockMutation.mutateAsync({id:id, data:newStock.value},{
+          onSuccess: ()=>{
+            queryClient.invalidateQueries(['products']);
+            queryClient.invalidateQueries(["products_data"]);W
+            queryClient.invalidateQueries(['products',id]);
+            successMessage.value = true;
+          },
+          onError: (e)=>{
+            errorMessage.value = e.message;
+          },
+          onSettled: ()=>{
             loading1.value = false;
-            router.push(`/productList?page=${productStore.pagination.currentPage}`);
-        } else {
-            errorMessage.value = response.value.message;
-            successMessage.value = false;
-        }
-
-        loading1.value = false;
-    }
-    loading1.value = false;
+          }
+        });
+      }
 }
 function closeModal() {
     router.push(`/productList?page=${productStore.pagination.currentPage}`);

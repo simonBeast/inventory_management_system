@@ -67,27 +67,30 @@ class ApiService {
       // Request was made and server responded with a status code
       // that falls out of the range of 2xx
       console.error('Error response:', error.response.data);
-      return {
-        status: error.response.status,
-        flag:0,
-        message: error.response.data.message || 'An error occurred'
-      };
+      throw new Error(error.response.data.message || 'An error occurred');
+      // return {
+      //   status: error.response.status,
+      //   flag:0,
+      //   message: error.response.data.message || 'An error occurred'
+      // };
     } else if (error.request) {
       // The request was made but no response was received
       console.error('Error request:', error.request);
-      return {
-        status: null,
-        flag:0,
-        message: 'No response received from server'
-      };
+      throw new Error('No response received from server');
+      // return {
+      //   status: null,
+      //   flag:0,
+      //   message: 'No response received from server'
+      // };
     } else {
       // Something happened in setting up the request that triggered an Error 
       console.error('Error message:', error.message);
-      return {
-        status: null,
-        flag:0,
-        message: error.message
-      };
+      throw new Error(error.message || 'Something went wrong');
+      // return {
+      //   status: null,
+      //   flag:0,
+      //   message: error.message
+      // };
     }
   }
 }

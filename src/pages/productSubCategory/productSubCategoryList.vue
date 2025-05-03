@@ -15,7 +15,7 @@
       <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <div class="flex flex-1 w-full md:w-auto gap-2">
           <input
-            v-model="searchTerm"
+            v-model="searchInput"
             type="text"
             placeholder="Search categories..."
             class="w-full md:w-64 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
@@ -49,7 +49,7 @@
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr
-              v-for="(item, index) in productSubCategoryStore.result"
+              v-for="(item, index) in productSubCategories.data"
               :key="index"
               class="hover:bg-gray-50 transition"
             >
@@ -75,8 +75,8 @@
       </div>
 
       <pagination
-        :total-pages="pagination2.totalPages"
-        :current-page="pagination2.currentPage"
+        :total-pages="paginationData.totalPages"
+        :current-page="paginationData.currentPage"
         @page-changed="handlePageChange"
         class="mt-6"
       />
@@ -106,25 +106,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, computed } from 'vue';
-import { useProductSubCategoryStore } from '../../store/productSubCategoryStore';
-import { useRouter } from 'vue-router';
+import { ref, defineProps, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../store/authStore';
 import pagination from '../../components/pagination.vue';
 import { useLanguageStore } from '../../store/languageStore';
+import { useDeleteProductSubCategory, useProductSubCategories } from '../../store/useProductSubCategory';
+import { useQueryClient } from '@tanstack/vue-query';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
-
-
+const route = useRoute();
 const router = useRouter();
+const errorMessage = ref(false);
 let authStore = useAuthStore();
-let productSubCategoryStore = useProductSubCategoryStore();
-let response = ref("");
-let errorMessage = ref(false);
-let pagination2 = ref(productSubCategoryStore.pagination);
-let searchTerm = ref("");
-let isSearch = ref(false);
-let loading = ref(true);
+let searchInput = ref("");
+
+let page = ref(Number(route.query.page) || 1);
+const searchTerm = ref(route.query.search || '');
 
 let props = defineProps(['drawerOpen']);
 
@@ -135,32 +133,47 @@ const containerClass = computed(() => ({
 
 let productIdToDelete = ref(null);
 
-onMounted(async () => {
-  response.value = await productSubCategoryStore.getProductSubCategories(authStore.token);
-  if (response.value.flag == 1) {
-    errorMessage.value = false;
+const params = computed(() => ({
+  page: page.value,
+  limit: 10,
+  token: authStore.token,
+  searchTerm: searchTerm.value,
+}));
+
+const {data:productSubCategories,isLoading:loading,isError,error} = useProductSubCategories(params);
+
+const paginationData = computed(() => productSubCategories.value?.pagination || null);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
   } else {
-    errorMessage.value = response.value.message;
+    errorMessage.value = "";
   }
-  loading.value = false;
 });
+
+const deleteProductSubCategoryMutation = useDeleteProductSubCategory(authStore.token);
 
 function openConfirmationModal(id) {
   productIdToDelete.value = id;
   document.getElementById('deleteModal').showModal();
 }
+const queryClient = useQueryClient();
 
 async function confirmDelete() {
-  if (productIdToDelete.value !== null) {
-    response.value = await productSubCategoryStore.deleteProductSubCategory(productIdToDelete.value, authStore.token);
-    if (response.value.flag == 1) {
-      errorMessage.value = '';
-      productSubCategoryStore.result = productSubCategoryStore.result.filter(item => item.id !== productIdToDelete.value);
-    } else {
-      errorMessage.value = response.value.message;
-    }
+ 
+      await deleteProductSubCategoryMutation.mutateAsync(productIdToDelete.value,{
+        onSuccess:()=>{
+        queryClient.invalidateQueries(["product_sub_categories"]);
+        queryClient.invalidateQueries(['products']);
+        queryClient.invalidateQueries(['product_sub_categories_alpha_no_limit']);
+        queryClient.invalidateQueries(["products_data"]);
+        },
+        onError:(e)=>{
+          errorMessage.value =  e.message;
+        }
+      });
     productIdToDelete.value = null;
-  }
   closeModal();
 }
 
@@ -169,36 +182,23 @@ function closeModal() {
 }
 
 async function handleSearch() {
-  if (searchTerm.value.trim()) {
-    loading.value = true;
-    response.value = await productSubCategoryStore.searchProductSubCategories(authStore.token, searchTerm.value);
-    if (response.value.flag == 1) {
-      errorMessage.value = false;
-      isSearch.value = true;
-    } else {
-      errorMessage.value = response.value.message;
+  if (searchInput.value.trim()) {
+
+    page.value = 1;
+    searchTerm.value = searchInput.value.trim();
+    router.replace({
+    query: {
+      ...route.query,
+      search: searchTerm.value,
+      page: page.value,
     }
-    loading.value = false;
-  } else {
-    if (isSearch.value) {
-      response.value = await productSubCategoryStore.getProductSubCategories(authStore.token);
-      if (response.value.flag == 1) {
-        errorMessage.value = false;
-        isSearch.value = false;
-      } else {
-        errorMessage.value = response.value.message;
-      }
-      loading.value = false;
-    }
+   });
+
   }
 }
 
-async function handlePageChange(page) {
-  if(!isSearch.value){
-    await productSubCategoryStore.changePage(authStore.token, page);
-  }else{
-    await productSubCategoryStore.changePageBySearch(authStore.token, searchTerm.value, page);
-  }
+async function handlePageChange(page1) {
+  page.value = page1;
 }
 
 async function handleUpdate(item) {

@@ -11,8 +11,8 @@
 
 
       <div
-        class="drawer-side md:sticky md:top-0 md:h-screen p-1 md:p-3 md:pt-4 md:ml-2 md:mt-2 md:rounded-2xl md:shadow-md"
-        :class="{ '-translate-x-full': !drawerOpen && isMobile }">
+        class="drawer-side md:sticky md:top-0 md:h-screen p-1 md:p-3 md:pt-4 md:ml-2 md:mt-2 md:rounded-2xl md:shadow-md">
+        <!-- :class="{ '-translate-x-full': !drawerOpen && isMobile }"> -->
         <label for="my-drawer-2" class="drawer-overlay"></label>
         <!-- <label for="my-drawer-2" aria-label="close sidebar"></label> -->
         <ul class="menu w-56 min-h-full bg-base-200 text-base-content rounded-xl overflow-hidden">
@@ -26,7 +26,7 @@
           <SidebarLink link="/productCategoryList" icon="tags"
             :text="isLanguageTigrigna ? 'ምድብ ኣቕሓ' : 'Product Category'" />
           <SidebarLink link="/productSubCategoryList" icon="tag"
-            :text="isLanguageTigrigna ? 'ንኡስ ምድብ ኣቕሓ' : 'Product Category'" />
+            :text="isLanguageTigrigna ? 'ንኡስ ምድብ ኣቕሓ' : 'Product Sub Category'" />
           <SidebarLink link="/productList" icon="box" :text="isLanguageTigrigna ? 'ኣቕሑ' : 'Products'" />
           <SidebarLink link="/productData" icon="database" :text="isLanguageTigrigna ? 'መረዳእታ ኣቕሑ' : 'Product Data'" />
           <SidebarLink link="/saleList" icon="dollar-sign" :text="isLanguageTigrigna ? 'መሸጣ' : 'Sales'" />

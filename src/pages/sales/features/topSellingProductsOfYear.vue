@@ -1,5 +1,5 @@
 <template>
-    <span v-if="loading && !errorMessage && authStore.isAdmin" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
+    <span v-if="isLoading && !errorMessage && authStore.isAdmin" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
     <div v-else-if="!errorMessage && authStore.isLoggedIn" :class="containerClass" class="overflow-x-auto mx-auto mt-5 mr-2 w-4/5 mb-16">
         <h3 class="block mt-2 text-center text-md sm:text-lg md:text-xl lg:text-2xl mb-8 text-gray-300 font-bold text-2xl p-3 rounded-md bg-indigo-700">{{isLanguageTigrigna ? "ዓሰርተ ናይዚ ዓመት ኣዝዮም ተሸየጥቲ ኣቑሑ ":"Top 10 selling Products of the Year"}}</h3>
         <table class="table table-zebra">
@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in saleStore.topSellingProductsOfYear" :key="index">
+                <tr v-for="(item, index) in data" :key="index">
                     <th>{{ index + 1}}</th>
                     <td>{{ item.productId }}</td>
                     <td>{{ item.Product.productName }}</td>
@@ -27,11 +27,12 @@
 </template>
 <script setup>
 
-import { ref, onMounted,defineProps, computed, } from 'vue';
+import { ref,defineProps, computed, watch, } from 'vue';
 
 import { useAuthStore } from '../../../store/authStore';
 import { useSaleStore } from '../../../store/saleStore';
 import { useLanguageStore } from '../../../store/languageStore';
+import { useTopSellingProductYear } from '../../../store/useSales';
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
@@ -49,20 +50,15 @@ const containerClass = computed(() => ({
     'ml-8': !props.drawerOpen 
 }));
 
-onMounted(async () => {
-    if (saleStore.topSellingProductsOfYear.length == 0) {
-        response.value = await saleStore.getTopSellingProductsOfYear(authStore.token);
-        if (response.value.flag == 1) {
-            errorMessage.value = false;
-            topSellingProductsOfYear.value = response.value.data.data;
-        } else {
-            errorMessage.value = response.value.message;
-        }
-    }
-    else{
-        topSellingProductsOfYear.value = saleStore.topSellingProductsOfYear;
-    }
-    loading.value = false;
-})
+const { isLoading, data, isError,error } = useTopSellingProductYear(authStore.token);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
+  } else {
+    errorMessage.value = "";
+  }
+});
+
 </script>
 <style scoped></style>

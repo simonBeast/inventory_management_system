@@ -14,30 +14,30 @@
       class="w-full mx-auto max-w-4xl bg-white shadow-xl rounded-2xl overflow-hidden transition-all duration-300"
     >
       <div class="px-6 py-5 border-b border-gray-200 bg-indigo-50">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-1">{{ product.productName }}</h2>
-        <p class="text-gray-600 text-sm italic">{{ product.productDescription }}</p>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-1">{{ productData.productName }}</h2>
+        <p class="text-gray-600 text-sm italic">{{ productData.productDescription }}</p>
       </div>
 
       <div class="px-6 py-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div class="space-y-2 text-gray-800 text-sm">
-          <p><span class="font-medium">📦 {{isLanguageTigrigna ? "ኣቕሓ ቑፅሪ:" : "Product Code:"}}</span> {{ product.productCode }}</p>
-          <p><span class="font-medium">🗂 {{isLanguageTigrigna ? "ንኡስ ምድብ ኣቕሓ:" : "Sub Category:"}}</span> {{ product.ProductSubCategory.name }}</p>
-          <p><span class="font-medium">📏 {{isLanguageTigrigna ?  "መዐቀኒ:" : "Unit:"}}</span> {{ product.measurementUnit }}</p>
-          <p><span class="font-medium">💰 {{isLanguageTigrigna ? "ዋጋ:" : "Price:"}}</span> {{ product.pricePerUnit }} Birr</p>
+          <p><span class="font-medium">📦 {{isLanguageTigrigna ? "ኣቕሓ ቑፅሪ:" : "Product Code:"}}</span> {{ productData.productCode }}</p>
+          <p><span class="font-medium">🗂 {{isLanguageTigrigna ? "ንኡስ ምድብ ኣቕሓ:" : "Sub Category:"}}</span> {{ productData.ProductSubCategory.name }}</p>
+          <p><span class="font-medium">📏 {{isLanguageTigrigna ?  "መዐቀኒ:" : "Unit:"}}</span> {{ productData.measurementUnit }}</p>
+          <p><span class="font-medium">💰 {{isLanguageTigrigna ? "ዋጋ:" : "Price:"}}</span> {{ productData.pricePerUnit }} Birr</p>
         </div>
 
         <div class="space-y-2 text-gray-800 text-sm">
           <p>
             <span class="font-medium">📊 {{isLanguageTigrigna ? "ቅሩብ:":"Available:"}}</span>
-            {{ product.ProductDetail.availableQuantity }} {{ product.measurementUnit }}
+            {{ productData.ProductDetail.availableQuantity }} {{ productData.measurementUnit }}
           </p>
           <p>
             <span class="font-medium">⚠️ {{isLanguageTigrigna ? "ዝተሓተ ስቶክ:" : "Min Stock:"}}</span>
-            {{ product.ProductDetail.minimumStockLevel }} {{ product.measurementUnit }}
+            {{ productData.ProductDetail.minimumStockLevel }} {{ productData.measurementUnit }}
           </p>
           <p>
             <span class="font-medium">🗓 {{isLanguageTigrigna ? "ተመዝገበሉ ዕለት:" : "Registered:"}}</span>
-            {{ formatDate(product.createdAt) }}
+            {{ formatDate(productData.createdAt) }}
           </p>
         </div>
       </div>
@@ -54,24 +54,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps, computed } from 'vue';
-import { useProductStore } from '../../store/productStore';
+import {defineProps, computed, watch } from 'vue';
 import { useAuthStore } from '../../store/authStore';
 import { useRoute } from 'vue-router';
-import { useLanguageStore } from '../../store/languageStore';
+import { useLanguageStore } from '../../store/languageStore'; 
+import { useProduct } from '../../store/useProduct';
 
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
-
-const productStore = useProductStore();
 const route = useRoute();
 const authStore = useAuthStore();
-const product = ref(null);
-const loading = ref(true);
-const response = ref(null);
 const productId = route.params.id;
 const errorMessage = ref(false);
-
 const props = defineProps(['drawerOpen']);
 
 const containerClass = computed(() => ({
@@ -85,16 +79,16 @@ const formatDate = (isoString) => {
   return date;
 };
 
-onMounted(async () => {
-  response.value = await productStore.getProduct(authStore.token, productId);
-  if (response.value.flag === 1) {
-    product.value = productStore.singleProduct || response.value.data.data;
-    errorMessage.value = false;
+const {isLoading:loading,data:productData,isError,error} = useProduct(productId,authStore.token);
+
+watch([isError, error], ([hasError,err]) => {
+  if (hasError) {
+    errorMessage.value = err.message || "Something went wrong";
   } else {
-    errorMessage.value = response.value.message || 'Something went wrong.';
+    errorMessage.value = "";
   }
-  loading.value = false;
 });
+
 </script>
 
 <style scoped>
