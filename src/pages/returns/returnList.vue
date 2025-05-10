@@ -39,8 +39,8 @@
             <td class="px-4 py-2">{{ item.saleId }}</td>
             <td class="px-4 py-2">{{ item.Product.productName }}</td>
             <td class="px-4 py-2">{{ item.quantityReturned }} {{ item.Product.measurementUnit }}</td>
-            <td class="px-4 py-2 capitalize">{{ convertReturnReasonToTigrigna(item.reason,item.reason ) }}</td>
-            <td class="px-4 py-2 capitalize">{{ convertReturnStatusToTigrigna(item.returnStatus,item.returnStatus)}}</td>
+            <td class="px-4 py-2 capitalize">{{ isLanguageTigrigna ?  convertReturnReasonToTigrigna(item.reason,item.reason ) : item.reason || " " }}</td>
+            <td class="px-4 py-2 capitalize">{{ isLanguageTigrigna ? convertReturnStatusToTigrigna(item.returnStatus,item.returnStatus) : item.returnStatus || " "}}</td>
             <td class="px-4 py-2 truncate max-w-[200px]">{{ item.description }}</td>
             <td class="px-4 py-2">{{ item.createdAt.split('T')[0] }}</td>
               <td class="px-4 py-3 space-x-2 whitespace-nowrap">

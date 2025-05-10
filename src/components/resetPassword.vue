@@ -76,18 +76,20 @@ async function handleSubmit() {
     loading.value = true;
     resetSuccess.value = false;
     resetError.value = false;
-    response.value = await userAuth.resetPassword(formData.value, resetToken);
-    if (response.value.flag == 1) {
+    try{
+        response.value = await userAuth.resetPassword(formData.value, resetToken);
         resetSuccess.value = true;
         resetError.value = false;
-    } else {
-        resetError.value = response.value.message;
-        resetSuccess.value = false;
-    }
-    loading.value = false;
+        
     setTimeout(() => {
         router.push('/categoryList');
     },2000)
+    }catch(e){
+        resetError.value = e.message;
+        resetSuccess.value = false;
+    }finally{
+        loading.value = false;
+    }   
 }
 function togglePasswordVisibility() {
     visible.value = !visible.value;

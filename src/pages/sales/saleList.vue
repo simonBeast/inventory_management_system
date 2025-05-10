@@ -161,38 +161,43 @@ const containerClass = computed(() => ({
 }));
 
 onMounted(async () => {
-  response.value = await saleStore.getSales(authStore.token);
-  if (response.value.flag == 1) {
-    if (userStore.result.length == 0) {
+  try{
+    response.value = await saleStore.getSales(authStore.token);
+  
       response.value = await userStore.getUsers(authStore.token);
-      if (response.value.flag == 1) {
+      
         errorMessage.value = false;
         saleStore.pagination.currentPage = Number(route.query.page) || 1;
         if (!saleStore.pagination.currentPage !== 1) {
           await saleStore.changePage(authStore.token,  saleStore.pagination.currentPage);
         }
         isSalesByDate.value = false;
-      } else {
-        errorMessage.value = response.value.message;
-      }
-    }
+      
+    
     sellerList.value = userStore.result;
     errorMessage.value = false;
-  } else {
-    errorMessage.value = response.value.message;
+  }catch(e){
+    errorMessage.value = e.message;
+  }finally{
+    loading.value = false;
   }
-  loading.value = false;
+  
+ 
+  
 });
 
 async function handleDelete(id) {
   saleIdToDelete.value = id;
   document.getElementById('deleteModal').showModal();
 }
+
 const queryClient = useQueryClient();
+
 async function confirmDelete() {
   if (saleIdToDelete.value !== null) {
-    response.value = await saleStore.deleteSale(saleIdToDelete.value, authStore.token);
-    if (response.value.flag == 1) {
+
+    try{
+      await saleStore.deleteSale(saleIdToDelete.value, authStore.token);
       queryClient.invalidateQueries(['products']);
       queryClient.invalidateQueries(["products_data"]);
       queryClient.invalidateQueries(['top_products_month']);
@@ -200,18 +205,20 @@ async function confirmDelete() {
       queryClient.invalidateQueries(['top_products_year']);
       errorMessage.value = '';
       saleStore.result = saleStore.result.filter(item => item.id !== saleIdToDelete.value);
-    } else {
-      errorMessage.value = response.value.message;
-    }
+   
     saleIdToDelete.value = null;
+    }catch(e){
+      errorMessage.value = e.message;
+    }finally{
+      closeModal();
+    }
   }
-  closeModal();
+  
 }
 
 function closeModal() {
   document.getElementById('deleteModal').close();
 }
-
 async function handlePageChange(page) {
   if (isSalesByDate.value) {
     await saleStore.changePageByDate(authStore.token, from.value, to.value, page);
@@ -222,29 +229,32 @@ async function handlePageChange(page) {
 async function filterByDate() {
   loading.value = true;
   if (from.value && to.value) {
-    response.value = await saleStore.getSalesByDate(authStore.token, from.value, to.value);
-    if (response.value.flag == 1) {
+    try{
+      response.value = await saleStore.getSalesByDate(authStore.token, from.value, to.value);
       errorMessage.value = false;
       isSalesByDate.value = true;
-    } else {
-      errorMessage = response.value.message;
+    }catch(e){
+      errorMessage = e.message;
+    }finally{
+      loading.value = false;
     }
   }
-  loading.value = false;
 }
 
 async function handleSeller() {
   loading.value = true;
   if (sellerId.value) {
-    response.value = await saleStore.getSalesBySeller(authStore.token, sellerId.value);
-    if (response.value.flag == 1) {
+    try{
+      response.value = await saleStore.getSalesBySeller(authStore.token, sellerId.value);
       errorMessage.value = false;
       isSalesByDate.value = false;
-    } else {
-      errorMessage = response.value.message;
+    }catch(e){
+      errorMessage = e.message;
+    }finally{
+      loading.value = false;
     }
   }
-  loading.value = false;
+  
 }
 
 async function handleUpdate(item) {

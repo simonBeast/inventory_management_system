@@ -106,14 +106,15 @@ const containerClass = computed(() => ({
 
 async function fetchSalesAndProfit() {
   loading.value = true;
-  response.value = await saleStore.getTotalSalesAndProfitInterval(authStore.token, startDate.value, endDate.value);
-  if (response.value.flag == 1) {
+  try{
+    response.value = await saleStore.getTotalSalesAndProfitInterval(authStore.token, startDate.value, endDate.value);
       errorMessage.value = false;
       salesAndProfitsOfInterval.value = response.value.data.data;
-  } else {
-      errorMessage.value = response.value.message;
-  }
-  loading.value = false;
+  }catch(e){
+    errorMessage.value = response.value.message;
+  }finally{
+    loading.value = false;
+  } 
 }
 
 </script>

@@ -17,7 +17,17 @@ onMounted(async () => {
     languageStore.setLanguagePreference(localStorage.getItem('language_pref') == 'ti' ? 'ti' : 'en');
   }
   if (localStorage.getItem('auth_token')){
-    response.value = await authStore.checkTokenValidity(localStorage.getItem('auth_token'));
+    try{
+      response.value = await authStore.checkTokenValidity(localStorage.getItem('auth_token'));
+    }catch(e){
+      console.log("error checking token validity",e.message
+      );
+      authStore.isCheckingAuth = false;
+      authStore.logout();
+      router.push('/login');
+    }
+    
+    
   } 
   if (response.value.flag == 1) {
     authStore.user = response.value.data.user;
@@ -28,7 +38,7 @@ onMounted(async () => {
       authStore.isAdmin = false;
     }
   }
-  else if (response.value.flag == 0) {
+  else {
     authStore.isCheckingAuth = false;
     authStore.logout();
     router.push('/login');

@@ -7,7 +7,7 @@
       <div class="relative mb-6">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 class="text-center text-lg md:text-2xl font-semibold text-gray-900">
-            {{ props.isEditing ? isLanguageTigrigna ? "ኣዐርይ" : "Edit" : isLanguageTigrigna ? "ሓዱሽ ንኡስ ምድብ ኣቕሓ ፍጠር" : "Create New" }}
+            {{ props.isEditing ? isLanguageTigrigna ? "ኣዐርይ" : "Edit" : isLanguageTigrigna ? "ሓዱሽ ንኡስ ምድብ ኣቕሓ ፍጠር" : "Create " }}
             {{ isLanguageTigrigna ? '' : 'Product Sub Category' }}
           </h2>
         </div>

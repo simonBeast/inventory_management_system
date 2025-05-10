@@ -132,33 +132,30 @@ onMounted(async () => {
 });
 
 async function fetchSales(){
+  try{
     let response = await saleStore.getSale(authStore.token, id);
-    if (response.flag == 1) {
         errorMessage.value = false;
         formData.value = response.data.data;
-            response = await productStore.getProductsAlphaNolimit(authStore.token);
-            if (response.flag == 1) {
-                errorMessage.value = false;
-            } else {
-                errorMessage.value = response.message;
-            }
-        
+        response = await productStore.getProductsAlphaNolimit(authStore.token);
+        errorMessage.value = false;
         productList.value = productStore.alphaNoLimit;
-    } else {
-        errorMessage.value = response.message;
-    }
+
+  }catch(e){
+    errorMessage.value = e.message;
+  }finally{
     loading0.value = false;
+  } 
 }
 
 async function fetchProducts(){
-    let response = await productStore.getProductsAlphaNolimit(authStore.token);
-            if (response.flag == 1) {
-                errorMessage.value = false;
-            } else {
-                errorMessage.value = response.message;
-            }
-        
-        productList.value = productStore.alphaNoLimit;
+
+    try{
+      await productStore.getProductsAlphaNolimit(authStore.token);
+      errorMessage.value = false;
+      productList.value = productStore.alphaNoLimit;
+    }catch(e){
+      errorMessage.value = e.message;
+    } 
 }
 
 async function handleSubmit(){
@@ -182,8 +179,8 @@ async function handleCreate(){
         errorMessage.value = "product can't be empty";
     } else {
         formData.value.sellerId = authStore.user.id;
-        let response = await saleStore.createSale(formData.value, authStore.token);
-        if (response.flag == 1) {
+        try{
+          await saleStore.createSale(formData.value, authStore.token);
           queryClient.invalidateQueries(['products']);
           queryClient.invalidateQueries(["products_data"]);
           queryClient.invalidateQueries(['top_products_month']);
@@ -191,16 +188,19 @@ async function handleCreate(){
           queryClient.invalidateQueries(['top_products_year']);
             successMessage.value = true;
             errorMessage.value = false;
-           
             router.push(`/saleList?page=${saleStore.pagination.currentPage}`);
-        } else {
-            errorMessage.value = response.message;
-            successMessage.value = false;
+        }catch(e){
+          errorMessage.value = e.message;
+          successMessage.value = false;
+        }finally{
+          loading1.value = false;
         }
+
     }
 
-    loading1.value = false;
+    
 }
+
 
 async function handleUpdate() {
     loading1.value = true;
@@ -210,12 +210,14 @@ async function handleUpdate() {
         errorMessage.value = "product can't be empty";
     } else {
         formData.value.sellerId = authStore.id;
-        let response = await saleStore.updateSale(id, {
+
+        try{
+          await saleStore.updateSale(id, {
             productId: formData.value.productId,
             quantity: formData.value.quantity,
             salePricePerUnit: formData.value.salePricePerUnit
         }, authStore.token)
-        if (response.flag == 1) {
+       
           queryClient.invalidateQueries(['products']);
           queryClient.invalidateQueries(["products_data"]);
           queryClient.invalidateQueries(['top_products_month']);
@@ -225,13 +227,15 @@ async function handleUpdate() {
             errorMessage.value = false;
             loading1.value = false;
             router.push(`/saleList?page=${saleStore.pagination.currentPage}`);
-        } else {
-            errorMessage.value = response.message;
-            successMessage.value = false;
-        }
+        }catch(e){
+          errorMessage.value = e.message;
+          successMessage.value = false;
+        }finally{
+          loading1.value = false;
+        }      
     }
 
-    loading1.value = false;
+    
 }
 
 function closeModal() {

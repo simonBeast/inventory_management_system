@@ -33,7 +33,7 @@
               <td class="px-4 py-2">{{ transaction.quantity }}</td>
               <td class="px-4 py-2">{{ transaction.unitPrice }}</td>
               <td class="px-4 py-2 font-semibold text-indigo-700">{{ transaction.totalCost }}</td>
-              <td class="px-4 py-2 text-gray-500 italic">{{ convertReturnReasonToTigrigna(transaction.returnReason,'N/A' ) }}</td>
+              <td class="px-4 py-2 text-gray-500 italic">{{ isLanguageTigrigna ? convertReturnReasonToTigrigna(transaction.returnReason,'N/A' ) : transaction.returnReason || 'N/A' }}</td>
               <td class="px-4 py-2">{{ new Date(transaction.createdAt).toLocaleString() }}</td>
             </tr>
           </tbody>

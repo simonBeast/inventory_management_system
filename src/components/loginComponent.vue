@@ -117,8 +117,9 @@ async function handleSubmit() {
   loading.value = true;
   loginSuccess.value = false;
     loginError.value = false;
-  response.value = await userAuth.login(email.value, password.value);
-  if (response.value.flag == 1) {
+    try{
+      response.value = await userAuth.login(email.value, password.value);
+  
     loginSuccess.value = true;
     loginError.value = false;
     userAuth.token = response.value.data.token;
@@ -131,11 +132,15 @@ async function handleSubmit() {
       userAuth.isAdmin = false;
       router.push('/sale');
     }
-  } else {
-    loginError.value = response.value.message;
-    loginSuccess.value = false;
-  }
-  loading.value = false;
+
+    }catch(e){
+      loginError.value = e.message;
+      loginSuccess.value = false;
+     
+    }finally{
+      loading.value = false;
+    }
+  
 }
 
 

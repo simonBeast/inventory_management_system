@@ -20,7 +20,7 @@
           {{ forgotError }}
         </div>
         <div v-if="forgotSuccess" class="text-green-500 text-sm mt-2">
-          {{ isLanguageTigrigna ? " " : "ናብዚ ኢመይል ንመሕለፊ ቃል ዳግመ ምትዕርራይ ዝኸውን ሊንክ ተላኢኹ" }}
+          {{ isLanguageTigrigna ? "ናብዚ ኢመይል ንመሕለፊ ቃል ዳግመ ምትዕርራይ ዝኸውን ሊንክ ተላኢኹ" : "A reset link has been sent to the email you've entered" }}
         </div>
         <span v-if="loading && !forgotError && !forgotSuccess"
           class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
@@ -53,15 +53,19 @@ async function handleSubmit() {
   loading.value = true;
   forgotSuccess.value = false;
   forgotError.value = false;
-  response.value = await userAuth.forgotPassword(email.value);
-  if (response.value.flag == 1) {
+
+  try {
+    response.value = await userAuth.forgotPassword(email.value);
     forgotSuccess.value = true;
     forgotError.value = false;
-  } else {
+  }catch(e){
     forgotError.value = response.value.message;
     forgotSuccess.value = false;
+  }finally{
+    loading.value = false;
   }
-  loading.value = false;
+
+ 
 }
 
 </script>
