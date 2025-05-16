@@ -1,6 +1,6 @@
 <template>
     <span v-if="loading0 && !errorMessage" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
-    <div v-else-if="authStore.isLoggedIn && authStore.isAdmin" :class="containerClass"
+    <div v-else-if="authStore.isLoggedIn" :class="containerClass"
       class="mt-10 inline-flex flex-col w-full max-w-2xl mx-auto h-full justify-center bg-white rounded-lg shadow-lg p-6 md:p-8 pb-8">
       
     
@@ -11,7 +11,7 @@
           {{ isLanguageTigrigna ? '' : 'Sale' }}
           </h2>
         </div>
-        <div class="absolute top-0 right-0 p-3 cursor-pointer" @click="closeModal">
+        <div v-if="authStore.isAdmin" class="absolute top-0 right-0 p-3 cursor-pointer" @click="closeModal">
           <font-awesome-icon icon="x" size="lg" class="text-gray-500 hover:text-gray-700" />
         </div>
       </div>
@@ -188,7 +188,10 @@ async function handleCreate(){
           queryClient.invalidateQueries(['top_products_year']);
             successMessage.value = true;
             errorMessage.value = false;
-            router.push(`/saleList?page=${saleStore.pagination.currentPage}`);
+            if(authStore.isAdmin){
+              router.push(`/saleList?page=${saleStore.pagination.currentPage}`);
+            }
+            
         }catch(e){
           errorMessage.value = e.message;
           successMessage.value = false;

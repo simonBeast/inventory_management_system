@@ -3,7 +3,7 @@
     <span v-if="(isLoadingProduct && !errorMessage) || isLoadingAlpha" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
   
     <div
-      v-else-if="authStore.isLoggedIn && authStore.isAdmin"
+      v-else-if="authStore.isLoggedIn"
       :class="containerClass"
       class="ml-56 md:ml-60 lg:ml-72 mt-6 w-full max-w-3xl mx-auto px-4 py-6 bg-white rounded-lg shadow-lg transition-all"
     >
@@ -14,7 +14,7 @@
           {{ props.isEditing ? isLanguageTigrigna ? "ኣዐርይ" : "Edit" : isLanguageTigrigna ? "ሓዱሽ ኣቕሓ ፍጠር" : "Create New" }}
           {{ isLanguageTigrigna ? '' : 'Product' }}
         </h2>
-        <button
+        <button v-if="authStore.isAdmin"
           class="p-2 bg-gray-200 hover:bg-gray-300 rounded-full transition"
           @click="closeModal"
           title="Close"
