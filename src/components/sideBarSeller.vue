@@ -19,11 +19,12 @@
           <div class="flex bg-gray-300 mb-4 -mx-2 -mt-2 p-2 rounded-t-xl">
             <img src="/images/bg.png" class="block" width="90" height="60" />
             <span class="ml-2 text-gray-800 text-lg font-semibold italic uppercase text-center pt-2">
-              {{ isLanguageTigrigna ? "ምሕደራ ንብረትን መሽጣን" : "Beast Inventory" }}
+              {{ isLanguageTigrigna ? "ምሕደራ ንብረትን መሽጣን" : "Digital Inventory" }}
             </span>
           </div>
           <SidebarLink link="/product" icon="box" :text="isLanguageTigrigna ? 'ኣቕሓ ኣእትው ' :'Insert Product'"/>
           <SidebarLink link="/sale" icon="dollar-sign" :text="isLanguageTigrigna ? 'ኣቕሓ ሽጥ':'Insert Sales'"/>
+          <SidebarLink link="/productData" icon="database" :text="isLanguageTigrigna ? 'መረዳእታ ኣቕሑ' : 'Product Data'" />
           <li @click="logout">
             <a>
               <font-awesome-icon icon="sign-out-alt" class="mr-2" />{{ isLanguageTigrigna ? 'ውፃእ' : 'Logout' }}

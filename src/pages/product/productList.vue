@@ -18,14 +18,14 @@
           @click="handleSearch"
           class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
         >
-          Search
+          {{ isLanguageTigrigna ? 'ኣልሽ' :'Search'}}
         </button>
       </div>
       <router-link
         to="/product"
         class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-600 transition duration-200 shadow-sm"
       >
-        + Create Product
+         + {{isLanguageTigrigna ? ' ምድብ ኣቕሓ ፍጠር':" Create Product"}}
       </router-link>
     </div>
 

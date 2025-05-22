@@ -153,7 +153,7 @@
         </div>
         <button
           type="submit"
-          class="btn btn-accent w-full md:w-1/3"
+          class="btn btn-primary w-full md:w-1/3"
           :disabled="loading1"
         >
           {{isLanguageTigrigna ? "ሓዱሽ ስቶክ ኣእትው" : "Add New Stock"}}

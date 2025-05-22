@@ -5,7 +5,7 @@
   ></span>
 
   <div
-    v-else-if="!errorMessage && authStore.isLoggedIn && authStore.isAdmin"
+    v-else-if="!errorMessage && authStore.isLoggedIn "
     :class="containerClass"
     class="overflow-x-auto mt-16 px-8 py-6 rounded-xl shadow-md w-full"
   >
