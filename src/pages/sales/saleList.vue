@@ -227,10 +227,10 @@ async function handlePageChange(page) {
   }
 }
 async function filterByDate() {
-  loading.value = true;
-  if (from.value && to.value) {
+ 
+    loading.value = true;
     try{
-      response.value = await saleStore.getSalesByDate(authStore.token, from.value, to.value);
+      response.value = await saleStore.getSalesByDate(authStore.token, from.value == false ? "0" : from.value, to.value == false ? "0" : to.value );
       errorMessage.value = false;
       isSalesByDate.value = true;
     }catch(e){
@@ -238,7 +238,6 @@ async function filterByDate() {
     }finally{
       loading.value = false;
     }
-  }
 }
 
 async function handleSeller() {

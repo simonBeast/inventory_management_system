@@ -59,7 +59,7 @@
               : props.isEditing
                 ? isLanguageTigrigna
                   ? 'መሸጣ ኣዐርይ'
-                  : 'Update Return'
+                  : 'Update Sale'
                 : isLanguageTigrigna
                   ? 'መሸጣ ፍጠር'
           : 'Create Sale'

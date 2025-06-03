@@ -168,7 +168,7 @@ async function confirmDelete() {
         queryClient.invalidateQueries(["products_alpha_no_limit"]);
         queryClient.invalidateQueries(["products_data"]);
         queryClient.invalidateQueries(["transaction_history"]);
-        queryClient.invalidateQueries(['products', id]);
+        queryClient.invalidateQueries(['products', productIdToDelete.value]);
       },
       onError:(e)=>{
         errorMessage.value = e.message;

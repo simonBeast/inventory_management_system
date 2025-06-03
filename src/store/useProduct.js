@@ -178,7 +178,6 @@ export function useUpdateProduct(token = null) {
 }
 
 export function useDeleteProduct(token = null) {
-  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id) => {
@@ -186,14 +185,10 @@ export function useDeleteProduct(token = null) {
         ApiService.setToken(token);
       }
       const response = await ApiService.delete(`/products/${id}`);
-      if (response.flag === 1) {
-        return response;
-      }
-      throw new Error(response.message || 'Error deleting product');
+     
+        return response.data;
+     
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['products',id] });
-    },
+    
   });
 }

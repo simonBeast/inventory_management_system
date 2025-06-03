@@ -348,7 +348,7 @@ async function handleAddNewStock() {
       await addNewStockMutation.mutateAsync({id:id, data:newStock.value},{
           onSuccess: ()=>{
             queryClient.invalidateQueries(['products']);
-            queryClient.invalidateQueries(["products_data"]);W
+            queryClient.invalidateQueries(["products_data"]);
             queryClient.invalidateQueries(['products',id]);
             successMessage.value = true;
           },

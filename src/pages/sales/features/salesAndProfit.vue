@@ -61,14 +61,14 @@
             <td class="px-6 py-3">{{ sale.totalQuantitySold || 0 }}</td>
             <td class="px-6 py-3">{{ (sale.totalSales || 0) + ' Birr' }}</td>
             <td class="px-6 py-3">{{ (sale.totalCost || 0) + ' Birr' }}</td>
-            <td class="px-6 py-3 font-semibold text-green-600">{{ (sale.profit || 0) + ' Birr' }}</td>
+            <td :class="'px-6 py-3 font-semibold ' + (sale.profit >= 0 ? 'text-green-600' : 'text-red-600')">{{ (sale.profit || 0) + ' Birr' }}</td>
           </tr>
           <tr class="bg-gray-100 font-semibold text-indigo-700">
             <td class="px-6 py-3">{{isLanguageTigrigna ? "":"Total"}}</td>
             <td class="px-6 py-3"></td>
             <td class="px-6 py-3">{{ (salesAndProfitsOfInterval.totalAggregatedData.totalSales || 0) + ' Birr' }}</td>
             <td class="px-6 py-3">{{ (salesAndProfitsOfInterval.totalAggregatedData.totalCost || 0) + ' Birr' }}</td>
-            <td class="px-6 py-3">{{ (salesAndProfitsOfInterval.totalAggregatedData.profit || 0) + ' Birr' }}</td>
+            <td :class="'px-6 py-3 ' + (salesAndProfitsOfInterval.totalAggregatedData.profit >= 0 ? 'text-green-600' : 'text-red-600')">{{ (salesAndProfitsOfInterval.totalAggregatedData.profit || 0) + ' Birr' }}</td>
           </tr>
         </tbody>
       </table>
