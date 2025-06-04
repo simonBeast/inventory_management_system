@@ -23,6 +23,7 @@ import pageNotFound from '../components/pageNotFound.vue';
 import forgotPassword from '../components/forgotPassword.vue';
 import resetPassword from '../components/resetPassword.vue';
 import productData from '../pages/product/productData.vue';
+import CreateSale from '../pages/sales/CreateSale.vue';
 const routes = [
     {
         path: '/',
@@ -54,8 +55,7 @@ const routes = [
     {
         path: '/category',
         name: 'createCategory',
-        component: categoryForm,
-        props: { isEditing: false },
+        component: CreateSale,
         meta: { requiresAuth: true },
     }
     ,
@@ -134,8 +134,7 @@ const routes = [
     {
         path: '/sale',
         name: 'createSale',
-        component: SaleForm,
-        props:{ isEditing: false },
+        component: CreateSale,
         meta: { requiresAuth: true },
     },
     {

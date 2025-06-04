@@ -262,7 +262,6 @@ async function handleUpdate(item) {
 </script>
 
 <style scoped>
-/* Custom styles for the form inputs */
 .input-field {
   width: 100%;
   padding: 0.5rem;

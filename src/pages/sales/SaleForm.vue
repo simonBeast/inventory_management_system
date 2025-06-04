@@ -112,7 +112,6 @@ let loading1 = ref(false);
 let id = route.params.id;
 
 
-
 const containerClass = computed(() => ({
     'ml-56 md:ml-60 lg:ml-72 w-1/2': props.drawerOpen,
     'ml-8 w-full': !props.drawerOpen

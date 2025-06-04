@@ -28,6 +28,14 @@ export const useSaleStore = defineStore('sale', {
       const response = await ApiService.post('/sales', data);
       return response;
     },
+    async createSales( data , token = null) {
+      const ApiService = new apiService('http://localhost:3001/api/v1/');
+      if (token) {
+        ApiService.setToken(token);
+      }
+      const response = await ApiService.post('/sales/many', data);
+      return response;
+    },
     async getSales(token = null , page = 1, limit = 10 ) {
       const ApiService = new apiService('http://localhost:3001/api/v1/');
       if (token) {

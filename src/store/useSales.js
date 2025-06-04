@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useQuery, useMutation } from '@tanstack/vue-query';
 import apiService from '../util/apiService';
 
 const baseURL = 'http://localhost:3001/api/v1/';
