@@ -36,9 +36,22 @@ export function useReturns(params) {
 
   
   const queryKey = computed(() => {
-    const { page } = params.value;
-    return  ['returns', page];
+    const { page, saleIdSearch, returnStatus, reason, startDate, endDate } = params.value;
+    return  ['returns', page, saleIdSearch, returnStatus, reason, startDate, endDate];
   });
+
+  const buildUrl = (targetPage) => {
+    const { limit, saleIdSearch, returnStatus, reason, startDate, endDate } = params.value;
+    let url = `/returns?page=${targetPage || 1}&limit=${limit || 10}`;
+
+    if (saleIdSearch) url += `&saleId[search]=${saleIdSearch}`;
+    if (returnStatus) url += `&returnStatus[eq]=${returnStatus}`;
+    if (reason) url += `&reason[eq]=${reason}`;
+    if (startDate) url += `&createdAt[gte]=${startDate}T00:00:00.000Z`;
+    if (endDate) url += `&createdAt[lte]=${endDate}T23:59:59.999Z`;
+
+    return url;
+  };
 
   const query = useQuery({
     queryKey,
@@ -47,14 +60,12 @@ export function useReturns(params) {
       if (params?.value?.token) {
         ApiService.setToken(params.value.token);
       }
-   
-      const url = `/returns?page=${params.value.page || 1}&limit=${params.value.limit || 10}`;
-    
+      const url = buildUrl(page);
         
       const response = await ApiService.get(url);
       
       const prefetch = async (targetPage) => {
-        const url = `/returns?page=${targetPage || 1}&limit=${limit || 10}`;
+        const url = buildUrl(targetPage);
       
         const response = await ApiService.get(url);
         return response?.data;
@@ -62,14 +73,14 @@ export function useReturns(params) {
 
       if (page < response.data.pagination.totalPages) {
         queryClient.prefetchQuery({
-          queryKey: ['returns', page + 1],
+          queryKey: ['returns', page + 1, params.value.saleIdSearch, params.value.returnStatus, params.value.reason, params.value.startDate, params.value.endDate],
           queryFn: () => prefetch(page + 1),
         });
       }
 
       if (page > 1) {
         queryClient.prefetchQuery({
-          queryKey: ['returns', page - 1],
+          queryKey: ['returns', page - 1, params.value.saleIdSearch, params.value.returnStatus, params.value.reason, params.value.startDate, params.value.endDate],
           queryFn: () => prefetch(page - 1),
         });
       }

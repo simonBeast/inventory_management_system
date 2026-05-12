@@ -27,7 +27,7 @@ export function useProductCategory(id, token = null) {
   }
 
 
-export function useProductCategoryAlphaNoLimit(token = null) {
+export function useProductCategoriesAlphaNoLimit(token = null) {
     const ApiService = new apiService(baseURL);
     if (token) {
       ApiService.setToken(token);

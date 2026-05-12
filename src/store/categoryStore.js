@@ -13,12 +13,12 @@ export const useCategoryStore = defineStore('category', {
   }),
   actions: {
 
-    async createCategory(name, token = null) {
+    async createCategory(data, token = null) {
       const ApiService = new apiService('http://localhost:3001/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
-      const response = await ApiService.post('/categories', { name });
+      const response = await ApiService.post('/categories', data);
       return response;
     },
     async getCategories(token = null , page = 1, limit = 10 ) {

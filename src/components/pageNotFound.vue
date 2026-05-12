@@ -1,5 +1,5 @@
 <template>
-    <div class="ml-80 lg:ml-96 mt-10">
+    <div class="ml-0 lg:ml-96 mt-10">
      <p class="text-5xl"> {{ isLanguageTigrigna ? "404 ገጽ ኣይተረኽበን" : "404 Page Not Found"}}</p>   
     </div>
 </template>

@@ -1,64 +1,81 @@
 <template>
-    <span v-if="isLoading && !errorMessage && authStore.isAdmin" class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
-    <div v-else-if="!errorMessage && authStore.isLoggedIn" :class="containerClass" class="overflow-x-auto mx-auto mt-5 mr-2 w-4/5 mb-16">
-        <h3 class="block mt-2 text-center text-md sm:text-lg md:text-xl lg:text-2xl mb-8 text-gray-300 font-bold text-2xl p-3 rounded-md bg-indigo-700">{{isLanguageTigrigna ? "ዓሰርተ ናይዚ ዓመት ኣዝዮም ተሸየጥቲ ኣቑሑ ":"Top 10 selling Products of the Year"}}</h3>
-        <table class="table table-zebra">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>{{isLanguageTigrigna ? "መለለዪ ኣቕሓ":"Product Id"}}</th>
-                    <th>{{isLanguageTigrigna ? "ስም ኣቕሓ":"Product Name"}}</th>
-                    <th>{{isLanguageTigrigna ? "ጠቕላላ በዝሒ ዝተሸጠ":"Total Quantity Sold"}}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in data" :key="index">
-                    <th>{{ index + 1}}</th>
-                    <td>{{ item.productId }}</td>
-                    <td>{{ item.Product.productName }}</td>
-                    <td>{{  item.totalQuantitySold }}</td>
-                </tr>
-            </tbody>
-        </table>
+  <div class="h-full">
+    <div v-if="isLoading && !errorMessage" class="flex items-center justify-center py-12">
+      <span class="loading loading-spinner text-blue-600"></span>
     </div>
-    <p v-if="errorMessage" :class="containerClass" class="font-semibold text-red-600 text-center">
-        {{ errorMessage }}
+
+    <div v-else-if="!errorMessage && authStore.isLoggedIn && authStore.isAdmin"
+      class="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden h-full flex flex-col">
+      
+      <!-- Card Header -->
+      <div class="px-6 py-5 bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border-b border-gray-100 dark:border-gray-800">
+        <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <font-awesome-icon icon="trophy" class="text-emerald-500" />
+          {{ isLanguageTigrigna ? "ናይዚ ዓመት ኣዝዮም ተሸየጥቲ" : "Annual Top Sellers" }}
+        </h3>
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-widest font-semibold">
+          {{ isLanguageTigrigna ? "ዝለዓለ ዓሰርተ ኣቑሑ" : "Top 10 performing items" }}
+        </p>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-50 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/30">
+              <th class="px-6 py-3 font-bold">#</th>
+              <th class="px-6 py-3 font-bold">{{ isLanguageTigrigna ? "ኣቕሓ" : "Product" }}</th>
+              <th class="px-6 py-3 font-bold text-right">{{ isLanguageTigrigna ? "በዝሒ" : "Sold" }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+            <tr v-for="(item, index) in data" :key="index" class="group hover:bg-emerald-50/30 dark:hover:bg-gray-800/50 transition-colors">
+              <td class="px-6 py-4">
+                <span :class="index < 3 ? 'bg-emerald-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'"
+                  class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold">
+                  {{ index + 1 }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="font-bold text-gray-800 dark:text-gray-200 text-sm group-hover:text-emerald-600 transition-colors">{{ item.Product.productName }}</div>
+                <div class="text-[10px] text-gray-400 font-mono">#{{ item.productId.toString().slice(-6).toUpperCase() }}</div>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">{{ item.totalQuantitySold }}</span>
+              </td>
+            </tr>
+            <tr v-if="!data || data.length === 0">
+              <td colspan="3" class="px-6 py-12 text-center text-gray-400 text-sm">
+                {{ isLanguageTigrigna ? "ምንም መረዳእታ የለን" : "No data for this year." }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-2xl text-xs font-bold text-center border border-red-100 dark:border-red-800/30">
+      <font-awesome-icon icon="circle-exclamation" class="mr-1" /> {{ errorMessage }}
     </p>
+  </div>
 </template>
+
 <script setup>
-
-import { ref,defineProps, computed, watch, } from 'vue';
-
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '../../../store/authStore';
-import { useSaleStore } from '../../../store/saleStore';
 import { useLanguageStore } from '../../../store/languageStore';
 import { useTopSellingProductYear } from '../../../store/useSales';
+
 const languageStore = useLanguageStore();
 const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
+const authStore = useAuthStore();
+const errorMessage = ref('');
 
-let authStore = useAuthStore();
-let saleStore = useSaleStore();
-let response = ref("");
-let topSellingProductsOfYear = ref([]);
-let loading = ref(true);
-let errorMessage = ref(false);
+const { isLoading, data, isError, error } = useTopSellingProductYear(authStore.token);
 
-let props = defineProps(['drawerOpen']);
-
-const containerClass = computed(() => ({
-    'ml-56 md:ml-60 lg:ml-72': props.drawerOpen,
-    'ml-8': !props.drawerOpen 
-}));
-
-const { isLoading, data, isError,error } = useTopSellingProductYear(authStore.token);
-
-watch([isError, error], ([hasError,err]) => {
-  if (hasError) {
-    errorMessage.value = err.message || "Something went wrong";
-  } else {
-    errorMessage.value = "";
-  }
+watch([isError, error], ([hasError, err]) => {
+  errorMessage.value = hasError ? (err.message || "Something went wrong") : "";
 });
-
 </script>
+
 <style scoped></style>

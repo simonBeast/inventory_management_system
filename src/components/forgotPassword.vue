@@ -1,72 +1,98 @@
 <template>
-  <div v-if="!userAuth.isLoggedIn" class="flex min-h-full flex-col mx-auto justify-center w-2/3 px-6 py-12 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-      <div
-        class="mt-10 w-2/3 md:w-full text-center text-md md:text-lg lg:text-2xl font-bold leading-6  tracking-tight text-gray-900">
-        {{ isLanguageTigrigna ? "መሕለፊ ቓል ረሲዕካ" : "Forgot Password" }}
-      </div>
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Abstract Background Elements -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
     </div>
-    <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form class="space-y-6" action="#" method="POST">
-        <div>
-          <label for="email" class="block text-sm font-medium leading-6 text-gray-900">{{ isLanguageTigrigna ? "ኢመይል"  : "Email:" }}</label>
-          <div class="mt-2">
-            <input id="email" name="email" type="email" autocomplete="email" v-model="email" required
-              :placeholder="isLanguageTigrigna ? 'ኢመይል' :'Email'"
-              class="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+
+    <div class="max-w-md w-full space-y-8 relative z-10">
+      <!-- Back to Login -->
+      <div class="flex justify-start">
+        <router-link to="/login" class="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-blue-600 transition-colors">
+          <font-awesome-icon icon="arrow-left" />
+          {{ isLanguageTigrigna ? "ተመለስ" : "Back to Sign In" }}
+        </router-link>
+      </div>
+
+      <!-- Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-10 border border-gray-100 dark:border-gray-700">
+        <div class="text-center mb-10">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-lg mb-6">
+            <font-awesome-icon icon="key" class="text-3xl" />
           </div>
+          <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            {{ isLanguageTigrigna ? "መሕለፊ ቓል ረሲዕካ" : "Reset Password" }}
+          </h2>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            {{ isLanguageTigrigna ? "ናብዚ ኢመይል ንመሕለፊ ቃል ዳግመ ምትዕርራይ ዝኸውን ሊንክ ክንልእከልካ ኢና" : "Enter your email and we'll send you a link to reset your password." }}
+          </p>
         </div>
-        <div v-if="forgotError" class="text-red-500 text-sm mt-2 font-semibold">
-          {{ forgotError }}
-        </div>
-        <div v-if="forgotSuccess" class="text-green-500 text-sm mt-2">
-          {{ isLanguageTigrigna ? "ናብዚ ኢመይል ንመሕለፊ ቃል ዳግመ ምትዕርራይ ዝኸውን ሊንክ ተላኢኹ" : "A reset link has been sent to the email you've entered" }}
-        </div>
-        <span v-if="loading && !forgotError && !forgotSuccess"
-          class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
-        <div>
-          <button @click.prevent="handleSubmit" type="submit"
-            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            {{ isLanguageTigrigna ? "ለኣኽ" : "Submit" }}
+
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+          <div>
+            <label for="email" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 px-1">
+              {{ isLanguageTigrigna ? "ኢመይል" : "Email Address" }}
+            </label>
+            <div class="relative group">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
+                <font-awesome-icon icon="envelope" />
+              </span>
+              <input id="email" v-model="email" type="email" required
+                :placeholder="isLanguageTigrigna ? 'ኢመይል' : 'example@email.com'"
+                class="block w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600" />
+            </div>
+          </div>
+
+          <div v-if="forgotError" class="p-3 rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
+            <font-awesome-icon icon="circle-exclamation" />
+            {{ forgotError }}
+          </div>
+
+          <div v-if="forgotSuccess" class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center gap-3">
+            <font-awesome-icon icon="circle-check" class="text-xl" />
+            <span>{{ isLanguageTigrigna ? "ናብዚ ኢመይል ንመሕለፊ ቃል ዳግመ ምትዕርራይ ዝኸውን ሊንክ ተላኢኹ" : "A reset link has been sent to your email address." }}</span>
+          </div>
+
+          <button type="submit" :disabled="loading || forgotSuccess"
+            class="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-2xl shadow-xl text-sm font-extrabold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all active:scale-[0.98] disabled:opacity-50">
+            <span v-if="loading" class="loading loading-spinner loading-sm mr-2"></span>
+            {{ isLanguageTigrigna ? "ለኣኽ" : "Send Reset Link" }}
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 </template>
+
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '../store/authStore';
 import { useLanguageStore } from '../store/languageStore';
-import { ref } from 'vue';
 
-let email = ref('');
-let forgotError = ref(false);
-let forgotSuccess = ref(false);
-let response = ref("");
-let userAuth = useAuthStore();
-let languageStore = useLanguageStore();
-const isLanguageTigrigna = computed(()=>languageStore.languagePreference == "ti");
-let loading = ref(false);
+const email = ref('');
+const forgotError = ref('');
+const forgotSuccess = ref(false);
+const loading = ref(false);
+
+const userAuth = useAuthStore();
+const languageStore = useLanguageStore();
+const isLanguageTigrigna = computed(() => languageStore.languagePreference == "ti");
 
 async function handleSubmit() {
   loading.value = true;
   forgotSuccess.value = false;
-  forgotError.value = false;
+  forgotError.value = '';
 
   try {
-    response.value = await userAuth.forgotPassword(email.value);
+    const res = await userAuth.forgotPassword(email.value);
     forgotSuccess.value = true;
-    forgotError.value = false;
-  }catch(e){
-    forgotError.value = response.value.message;
-    forgotSuccess.value = false;
-  }finally{
+  } catch (e) {
+    forgotError.value = e.message || "An error occurred. Please try again.";
+  } finally {
     loading.value = false;
   }
-
- 
 }
-
 </script>
+
 <style scoped></style>

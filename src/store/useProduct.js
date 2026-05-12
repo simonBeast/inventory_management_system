@@ -131,11 +131,11 @@ export function useProducts(params) {
 export function useAddNewStock(token = null) {
 
   return useMutation({
-    mutationFn: async ({id,data}) => {
+    mutationFn: async ({productId,data}) => {
       if (token) {
         ApiService.setToken(token);
       }
-      const response = await ApiService.post(`/products/addNewStock/${id}`, data);
+      const response = await ApiService.post(`/products/addNewStock/${productId}`, data);
       if (response.flag === 1) {
         return response;
       }

@@ -1,26 +1,78 @@
 <template>
-   <div v-if="authStore.isCheckingAuth">
-    <span class="block loading loading-spinner text-primary mt-6 mx-auto"></span>
+  <div v-if="authStore.isCheckingAuth">
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <span class="loading loading-spinner loading-lg text-blue-600"></span>
+    </div>
   </div>
-   <div v-else class="flex">
-      <side-bar v-if="authStore.isAdmin" @drawer-toggle="handleDrawerToggle"/>
-      <sideBarSeller v-else-if="authStore.isLoggedIn && !authStore.isAdmin" @drawer-toggle="handleDrawerToggle"/>
-      <router-view :drawer-open="drawerOpen" />
-   </div>
+  <div v-else-if="authStore.isLoggedIn" :class="['drawer h-screen overflow-hidden', isLargeScreen ? 'lg:drawer-open' : '']">
+    <input id="main-drawer" type="checkbox" class="drawer-toggle" v-model="drawerOpen" />
+    
+    <div class="drawer-content flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      <!-- Mobile Navbar Toggle -->
+      <div class="lg:hidden p-4 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-20 border-b border-gray-100 dark:border-gray-800">
+        <label for="main-drawer" class="btn btn-ghost btn-circle text-blue-600">
+          <font-awesome-icon icon="bars" size="lg" />
+        </label>
+      </div>
+
+      <!-- Main Page Content -->
+      <main class="flex-1 overflow-y-auto overflow-x-hidden">
+        <router-view :drawer-open="drawerOpen" />
+      </main>
+    </div>
+
+    <!-- Sidebar Menu Area -->
+    <div class="drawer-side z-40">
+      <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+      <sideBar v-if="authStore.isAdmin" />
+      <sideBarSeller v-else />
+    </div>
+  </div>
+  <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <router-view />
+  </div>
 </template>
+
 <script setup>
 import sideBar from '../components/sideBar.vue';
 import sideBarSeller from '../components/sideBarSeller.vue';
 import { useAuthStore } from '../store/authStore';
-import { ref,onMounted } from 'vue';
-let authStore = useAuthStore();
-let drawerOpen = ref(true);
-onMounted(()=>{
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
-})
-function handleDrawerToggle(isOpen) {
-  drawerOpen.value = isOpen;
-  
+const authStore = useAuthStore();
+const route = useRoute();
+const drawerOpen = ref(false);
+const isLargeScreen = ref(window.innerWidth >= 1024);
+
+function handleResize() {
+  isLargeScreen.value = window.innerWidth >= 1024;
 }
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+  if (!isLoggedIn) {
+    drawerOpen.value = false;
+  }
+});
+
+// Close drawer on route change (for mobile)
+watch(() => route.path, () => {
+  if (!isLargeScreen.value) {
+    drawerOpen.value = false;
+  }
+});
 </script>
-<style scoped></style>
+
+<style scoped>
+.drawer-content {
+  transition: padding 0.3s ease;
+}
+</style>

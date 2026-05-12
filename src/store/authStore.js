@@ -60,6 +60,14 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.token = null;
       this.isLoggedIn = false;
+      this.isAdmin = false;
+      this.isCheckingAuth = false;
+      this.user = {
+        id: null,
+        email: null,
+        fullName: null,
+        role: null,
+      };
       localStorage.removeItem('auth_token');
     }
   },

@@ -39,9 +39,9 @@ onMounted(async () => {
     }
   }
   else {
-    authStore.isCheckingAuth = false;
-    authStore.logout();
-    router.push('/login');
+    // authStore.isCheckingAuth = false;
+    // authStore.logout();
+    // router.push('/login');
   }
   authStore.isCheckingAuth = false;
 })

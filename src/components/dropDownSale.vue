@@ -11,7 +11,7 @@
           :key="item.id"
           @click="selectItem(item)"
         >
-          {{  item.productName}}
+          {{ item[labelKey] }}
         </div>
       </div>
     </div>
@@ -29,6 +29,10 @@
       type: Array,
       required: true,
     },
+    labelKey: {
+      type: String,
+      default: 'productName'
+    }
   });
   const emit = defineEmits(['update:modelValue']);
   
@@ -40,7 +44,7 @@
   };
   
   const selectItem = (item) => {
-    selectedItemName.value = item.productName;
+    selectedItemName.value = item[props.labelKey];
     emit('update:modelValue', item.id);
     isOpen.value = false;
   };
@@ -49,7 +53,7 @@
     () => props.modelValue,
     (newValue) => {
       const selectedItem = props.list.find((item) => item.id === newValue);
-      selectedItemName.value = selectedItem ? selectedItem.productName : '';
+      selectedItemName.value = selectedItem ? selectedItem[props.labelKey] : '';
     },
     { immediate: true }
   );

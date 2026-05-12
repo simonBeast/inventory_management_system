@@ -28,7 +28,7 @@ export function useCategory(id, token = null) {
   }
 
 
-export function useCategoryAlphaNoLimit(token = null) {
+export function useCategoriesAlphaNoLimit(token = null) {
     const ApiService = new apiService(baseURL);
     if (token) {
       ApiService.setToken(token);
@@ -114,11 +114,15 @@ export function useCategories(params) {
 export function useCreateCategory(token = null) {
   
   return useMutation({
-    mutationFn: async (name) => {
+    mutationFn: async (data) => {
       if (token) {
         ApiService.setToken(token);
       }
-      const response = await ApiService.post('/categories', { name });
+      const payload = {
+        name: data?.name,
+      };
+      
+      const response = await ApiService.post('/categories', payload);
       
         return response;
      
@@ -133,7 +137,11 @@ export function useUpdateCategory(token = null) {
       if (token) {
         ApiService.setToken(token);
       }
-      const response = await ApiService.patch(`/categories/${id}`, data);
+      const payload = {
+        name: data?.name,
+        description: data?.description
+      };
+      const response = await ApiService.patch(`/categories/${id}`, payload);
       
         return response.data;
       

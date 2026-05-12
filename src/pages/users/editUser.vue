@@ -1,6 +1,6 @@
 <template>
 
-  <span v-if="loading0 && !errorMessage" class="block loading loading-spinner text-indigo-600 mt-6 mx-auto"></span>
+  <span v-if="loading0 && !errorMessage" class="block loading loading-spinner text-blue-600 mt-6 mx-auto"></span>
 
   <div v-else-if="authStore.isLoggedIn && authStore.isAdmin" :class="containerClass"
     class="ml-56 md:ml-60 lg:ml-72 mt-4 w-full md:w-3/4 lg:w-1/2 mx-auto px-6 py-4  rounded shadow-md relative">
@@ -16,18 +16,18 @@
       <div>
         <label for="fullName" class="block text-sm font-medium text-gray-700">{{ isLanguageTigrigna ? "ምሉእ ስም" : "Full Name"}}</label>
         <input id="fullName" v-model="formData.fullName" type="text" required
-          class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
       </div>
 
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700">{{ isLanguageTigrigna ? "ኢመይል" :
           "Email"}}</label>
         <input id="email" v-model="formData.email" type="email" required
-          class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
       </div>
 
       <button type="submit" :disabled="loading1"
-        class="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition disabled:opacity-50">
+        class="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50">
         {{ isLanguageTigrigna ? "መረዳእታ ተጠቃሚ ኣዐርይ" : "Update User Info" }}
       </button>
     </form>
@@ -43,7 +43,7 @@
           "New Password"}}</label>
         <div class="relative mt-1">
           <input id="newPassword" v-model="formDataP.newPassword" :type="text" required placeholder="********"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
           <font-awesome-icon :icon="eye" class="absolute top-2.5 right-3 text-gray-500 cursor-pointer"
             @click="togglePasswordVisibility" />
         </div>
@@ -53,7 +53,7 @@
         <label for="passwordConfirm" class="block text-sm font-medium text-gray-700">{{ isLanguageTigrigna ? "መሕለፊ ቃል ኣረጋግፅ":"Confirm Password"}}</label>
         <div class="relative mt-1">
           <input id="passwordConfirm" v-model="formDataP.confirmPassword" :type="text" required placeholder="********"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
           <font-awesome-icon :icon="eye" class="absolute top-2.5 right-3 text-gray-500 cursor-pointer"
             @click="togglePasswordVisibility" />
         </div>
@@ -61,7 +61,7 @@
 
       <div class="flex justify-end">
         <button type="submit" :disabled="loading1"
-          class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition disabled:opacity-50">
+          class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50">
           {{ isLanguageTigrigna ? "መሕለፊ ቃል ዳግማይ ስራዕ" : "Reset Password" }}
         </button>
       </div>
@@ -71,7 +71,7 @@
       <p v-if="errorMessage" class="text-red-600 font-semibold text-sm">{{ errorMessage }}</p>
       <p v-if="successMessage" class="text-green-600 font-semibold text-sm">{{ isLanguageTigrigna ? "ዝተሳኽዐ ምዕራይ" : "Update Successful"}}</p>
       <span v-if="loading1 && !errorMessage && !successMessage"
-        class="block loading loading-spinner text-indigo-600 mt-4 mx-auto"></span>
+        class="block loading loading-spinner text-blue-600 mt-4 mx-auto"></span>
     </div>
   </div>
 </template>
@@ -108,7 +108,7 @@ let props = defineProps(['drawerOpen']);
 
 const containerClass = computed(() => ({
   'ml-56 md:ml-60 lg:ml-72 w-1/2': props.drawerOpen,
-  'ml-8 w-full': !props.drawerOpen
+  'ml-0 w-full': !props.drawerOpen
 }));
 
 const languageStore = useLanguageStore();

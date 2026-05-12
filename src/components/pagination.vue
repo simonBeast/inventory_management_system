@@ -1,14 +1,18 @@
 <template>
-    <div class="flex justify-center items-center space-x-4 mt-2">
-        <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
-            class="px-2 py-1 bg-blue-500 text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed">
-            {{isLanguageTigrigna ? "ተመለስ" : "Previous"}}
-        </button>
-        <span class="text-sm">Page {{ currentPage }} of {{ totalPages }}</span>
-        <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
-            class="px-2 py-1 bg-blue-500 text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed">
-            {{isLanguageTigrigna ? "ቐፅል" : "Next"}}
-        </button>
+    <div class="mt-6 flex items-center justify-center">
+        <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white px-3 py-2 shadow-sm">
+            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                class="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+                {{isLanguageTigrigna ? "ተመለስ" : "Previous"}}
+            </button>
+            <span class="rounded-full bg-slate-900/5 px-3 py-1 text-xs font-semibold tracking-wide text-slate-600">
+                Page {{ currentPage }} of {{ totalPages }}
+            </span>
+            <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
+                class="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none">
+                {{isLanguageTigrigna ? "ቐፅል" : "Next"}}
+            </button>
+        </div>
     </div>
 </template>
 
