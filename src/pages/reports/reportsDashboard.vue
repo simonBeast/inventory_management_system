@@ -6,7 +6,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Reports</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Asset holding and sales summary by category levels.</p>
       </div>
     </div>
 
