@@ -88,8 +88,8 @@
               </td>
               <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ transaction.Product?.productName || transaction.productId }}</td>
               <td class="px-6 py-4 text-center">{{ transaction.quantity }}</td>
-              <td class="px-6 py-4 font-mono">{{ transaction.unitPrice.toLocaleString() }}</td>
-              <td class="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">{{ transaction.totalCost.toLocaleString() }}</td>
+              <td class="px-6 py-4 font-mono">{{ (transaction.unitPrice || 0).toLocaleString() }}</td>
+              <td class="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">{{ (transaction.totalCost || 0).toLocaleString() }}</td>
               <td class="px-6 py-4 text-xs text-gray-500">{{ new Date(transaction.createdAt).toLocaleString() }}</td>
             </tr>
           </tbody>
