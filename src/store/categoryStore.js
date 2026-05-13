@@ -14,7 +14,7 @@ export const useCategoryStore = defineStore('category', {
   actions: {
 
     async createCategory(data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -22,7 +22,7 @@ export const useCategoryStore = defineStore('category', {
       return response;
     },
     async getCategories(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -40,7 +40,7 @@ export const useCategoryStore = defineStore('category', {
       return response;
     },
     async searchCategories(token = null , searchTerm = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -58,7 +58,7 @@ export const useCategoryStore = defineStore('category', {
     }
     ,
     async getCategory(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -66,7 +66,7 @@ export const useCategoryStore = defineStore('category', {
       return response;
     },
     async getCategoriesAlphaNoLimit(token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -78,7 +78,7 @@ export const useCategoryStore = defineStore('category', {
     }
     ,
     async updateCategory(id, data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -86,7 +86,7 @@ export const useCategoryStore = defineStore('category', {
       return response;
     },
     async deleteCategory(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }

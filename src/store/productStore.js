@@ -16,7 +16,7 @@ export const useProductStore = defineStore('product', {
   actions: {
 
     async createProduct( data , token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -24,7 +24,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async getProducts(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -42,7 +42,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async getProductsAlphaNolimit( token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -53,7 +53,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async searchProducts(token = null , searchTerm = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -71,7 +71,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async getProduct( token = null , id) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -82,7 +82,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async getProductData( token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -93,7 +93,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async updateProduct(id, data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -101,7 +101,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async addNewStock(id, data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -109,7 +109,7 @@ export const useProductStore = defineStore('product', {
       return response;
     },
     async deleteProduct(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }

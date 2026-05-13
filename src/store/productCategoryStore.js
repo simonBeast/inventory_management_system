@@ -14,7 +14,7 @@ export const useProductCategoryStore = defineStore('productCategory', {
   actions: {
 
     async createProductCategory( data , token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -22,7 +22,7 @@ export const useProductCategoryStore = defineStore('productCategory', {
       return response;
     },
     async getProductCategories(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -40,7 +40,7 @@ export const useProductCategoryStore = defineStore('productCategory', {
       return response;
     },
     async searchProductCategories(token = null , searchTerm = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -58,7 +58,7 @@ export const useProductCategoryStore = defineStore('productCategory', {
     }
     ,
     async getProductCategory( token = null , id) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -66,7 +66,7 @@ export const useProductCategoryStore = defineStore('productCategory', {
       return response;
     },
     async getProductCategoriesAlphaNolimit( token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -77,7 +77,7 @@ export const useProductCategoryStore = defineStore('productCategory', {
       return response;
     },
     async updateProductCategory(id, data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -85,7 +85,7 @@ export const useProductCategoryStore = defineStore('productCategory', {
       return response;
     },
     async deleteProductCategory(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
