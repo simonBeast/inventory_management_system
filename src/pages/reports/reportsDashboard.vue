@@ -36,6 +36,16 @@
         {{ assetErrorMessage }}
       </div>
       <div v-else class="overflow-x-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 border-b border-gray-100 dark:border-gray-800">
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+            <div class="text-xs text-gray-500">Total Qty</div>
+            <div class="text-lg font-bold text-gray-900 dark:text-white">{{ formatNumber(assetSummary.totalQty) }}</div>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+            <div class="text-xs text-gray-500">Total Holding Value</div>
+            <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ formatNumber(assetSummary.totalValue) }}</div>
+          </div>
+        </div>
         <table class="min-w-full table-auto">
           <thead class="bg-gray-50/50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-semibold text-left border-b border-gray-200 dark:border-gray-700">
             <tr>
@@ -92,9 +102,6 @@
             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
             <input v-model="toDate" type="date"
               class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all text-gray-900 dark:text-white" />
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">
-            Pick a date range to load sales totals.
           </div>
         </div>
 
@@ -194,6 +201,20 @@ const assetRows = computed(() => {
   return data.productSubCategories || [];
 });
 
+const assetSummary = computed(() => {
+  const data = assetData.value || {};
+  if (data.summary) return data.summary;
+
+  return assetRows.value.reduce(
+    (acc, row) => {
+      acc.totalQty += Number(row.totalQty || 0);
+      acc.totalValue += Number(row.totalValue || 0);
+      return acc;
+    },
+    { totalQty: 0, totalValue: 0 }
+  );
+});
+
 const salesRows = computed(() => {
   const data = salesData.value || {};
   if (salesGroup.value === 'category') return data.categories || [];
@@ -202,6 +223,9 @@ const salesRows = computed(() => {
 });
 
 const salesSummary = computed(() => {
+  const data = salesData.value || {};
+  if (data.summary) return data.summary;
+
   return salesRows.value.reduce(
     (acc, row) => {
       acc.totalQty += Number(row.totalQty || 0);

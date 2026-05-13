@@ -14,7 +14,7 @@ export const useProductSubCategoryStore = defineStore('productSubCategory', {
   actions: {
 
     async createProductSubCategory( data , token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -22,7 +22,7 @@ export const useProductSubCategoryStore = defineStore('productSubCategory', {
       return response;
     },
     async getProductSubCategories(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -40,7 +40,7 @@ export const useProductSubCategoryStore = defineStore('productSubCategory', {
       return response;
     },
     async getProductSubCategory( token = null , id) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -48,7 +48,7 @@ export const useProductSubCategoryStore = defineStore('productSubCategory', {
       return response;
     },
     async getProductSubCategoriesAlphaNoLimit( token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -59,7 +59,7 @@ export const useProductSubCategoryStore = defineStore('productSubCategory', {
       return response;
     },
     async searchProductSubCategories(token = null , searchTerm = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -77,7 +77,7 @@ export const useProductSubCategoryStore = defineStore('productSubCategory', {
     }
     ,
     async updateProductSubCategory(id, data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -85,7 +85,7 @@ export const useProductSubCategoryStore = defineStore('productSubCategory', {
       return response;
     },
     async deleteProductSubCategory(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }

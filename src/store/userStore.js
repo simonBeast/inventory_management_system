@@ -13,7 +13,7 @@ export const useUserStore = defineStore('user', {
   actions: {
 
     async getUsers(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', {
       return response;
     },
     async getUser(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -39,7 +39,7 @@ export const useUserStore = defineStore('user', {
       return response;
     },
     async changeUserPassword(userId,data,token = null){
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -47,7 +47,7 @@ export const useUserStore = defineStore('user', {
       return response;
     },
     async updateUser(id, data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -55,7 +55,7 @@ export const useUserStore = defineStore('user', {
       return response;
     },
     async searchUsers(token = null , searchTerm = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -73,7 +73,7 @@ export const useUserStore = defineStore('user', {
     }
     ,
     async deleteUser(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }

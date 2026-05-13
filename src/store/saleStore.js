@@ -21,7 +21,7 @@ export const useSaleStore = defineStore('sale', {
   actions: {
 
     async createSale( data , token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -29,7 +29,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async createSales( data , token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -37,7 +37,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getSales(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -55,7 +55,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getSale( token = null , id) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -63,7 +63,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async updateSale(id, data, token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -71,7 +71,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async deleteSale(id, token = null) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -79,7 +79,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getSalesByProduct(token,id,page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -95,7 +95,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getSalesByDate(token, from, to, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -111,7 +111,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getSalesBySeller(token, sellerId, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -127,7 +127,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getTopSellingProductsOfMonth(token, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -143,7 +143,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getTopSellingProductsOfQuarter(token, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -159,7 +159,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getTopSellingProductsOfYear(token, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -175,7 +175,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getTotalSalesAndProfitsOfMonth(token, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -191,7 +191,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getTotalSalesAndProfitsOfQuarter(token, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -207,7 +207,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getTotalSalesAndProfitsOfYear(token, page = 1 , limit = 10) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -223,7 +223,7 @@ export const useSaleStore = defineStore('sale', {
       return response;
     },
     async getTotalSalesAndProfitInterval(token,startDate,endDate){
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }

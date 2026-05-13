@@ -13,7 +13,7 @@ export const useTransactionHistoryStore = defineStore('transactionHistory', {
   }),
   actions: {
     async getTransactionHistories(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }
@@ -31,7 +31,7 @@ export const useTransactionHistoryStore = defineStore('transactionHistory', {
       return response;
     },
     async gettransactionHistory( token = null , id) {
-      const ApiService = new apiService('http://185.252.232.31/api/v1/');
+      const ApiService = new apiService(`${import.meta.env.VITE_API_URL}/`);
       if (token) {
         ApiService.setToken(token);
       }

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { computed } from 'vue';
 import apiService from '../util/apiService';
 
-const baseURL = 'http://185.252.232.31/api/v1/';
+const baseURL = `${import.meta.env.VITE_API_URL}/`;
 const ApiService = new apiService(baseURL);
 
 export function useSalesReport(params) {
