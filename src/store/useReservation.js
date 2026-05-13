@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import apiService from '../util/apiService';
 import { computed } from 'vue';
 
-const baseURL = 'http://localhost:3001/api/v1/';
+const baseURL = 'http://185.252.232.31:3001/api/v1/';
 const ApiService = new apiService(baseURL);
 
 export function useReservation(id, token = null) {

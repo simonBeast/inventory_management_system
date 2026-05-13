@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', {
     },
     async login(email, password) {
 
-      let ApiService = new apiService('http://localhost:3001/api/v1/users');
+      let ApiService = new apiService('http://185.252.232.31:3001/api/v1/users');
       let response = await ApiService.post('/signin', { email, password });
       if (response.flag == 1) {
         if (response.data['token']) {
@@ -38,22 +38,22 @@ export const useAuthStore = defineStore('auth', {
 
     },
     async register(email, password, fullName) {
-      let ApiService = new apiService('http://localhost:3001/api/v1/users');
+      let ApiService = new apiService('http://185.252.232.31:3001/api/v1/users');
       let response = await ApiService.post('/signup', { email, password, fullName });
       return response;
     },
     async forgotPassword(email){
-      let ApiService = new apiService('http://localhost:3001/api/v1/users');
+      let ApiService = new apiService('http://185.252.232.31:3001/api/v1/users');
       let response = await ApiService.post('/forgotPassword', { email});
       return response;
     },
     async resetPassword(data,resetToken){
-      let ApiService = new apiService('http://localhost:3001/api/v1/users');
+      let ApiService = new apiService('http://185.252.232.31:3001/api/v1/users');
       let response = await ApiService.post(`/resetPassword/${resetToken}`, data);
       return response;
     },
     async checkTokenValidity(token) {
-      let ApiService = new apiService('http://localhost:3001/api/v1/users');
+      let ApiService = new apiService('http://185.252.232.31:3001/api/v1/users');
       let response = await ApiService.post('/checkTokenValidity', { token });
       return response;
     },

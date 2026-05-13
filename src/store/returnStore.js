@@ -14,7 +14,7 @@ export const useReturnStore = defineStore('return', {
   actions: {
 
     async createReturn( data , token = null) {
-      const ApiService = new apiService('http://localhost:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -22,7 +22,7 @@ export const useReturnStore = defineStore('return', {
       return response;
     },
     async getReturns(token = null , page = 1, limit = 10 ) {
-      const ApiService = new apiService('http://localhost:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -40,7 +40,7 @@ export const useReturnStore = defineStore('return', {
       return response;
     },
     async getReturn( token = null , id) {
-      const ApiService = new apiService('http://localhost:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -48,7 +48,7 @@ export const useReturnStore = defineStore('return', {
       return response;
     },
     async updateReturn(id, data, token = null) {
-      const ApiService = new apiService('http://localhost:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }
@@ -56,7 +56,7 @@ export const useReturnStore = defineStore('return', {
       return response;
     },
     async deleteReturn(id, token = null) {
-      const ApiService = new apiService('http://localhost:3001/api/v1/');
+      const ApiService = new apiService('http://185.252.232.31:3001/api/v1/');
       if (token) {
         ApiService.setToken(token);
       }

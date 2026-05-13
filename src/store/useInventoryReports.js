@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { computed } from 'vue';
 import apiService from '../util/apiService';
 
-const baseURL = 'http://localhost:3001/api/v1/';
+const baseURL = 'http://185.252.232.31:3001/api/v1/';
 const ApiService = new apiService(baseURL);
 
 export function useAssetHoldingReport(params) {
