@@ -28,7 +28,7 @@
           </span>
         </span>
       </div>
-      <div class="flex flex-col">
+      <div v-if="authStore.isAdmin" class="flex flex-col">
         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ isLanguageTigrigna ? "ዋጋ" : "Price" }}</span>
         <span class="text-blue-600 dark:text-blue-400 font-bold font-mono">{{ productData.pricePerUnit }} <span class="text-[10px] font-normal text-gray-500">Birr/{{ productData.measurementUnit }}</span></span>
       </div>
