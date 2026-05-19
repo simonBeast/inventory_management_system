@@ -48,7 +48,7 @@
               <th class="px-6 py-4">{{ isLanguageTigrigna ? "ንኡስ ምድብ" : "Sub Category" }}</th>
               <th class="px-6 py-4 text-center">{{ isLanguageTigrigna ? "በዝሒ" : "Qty" }}</th>
               <th class="px-6 py-4">{{ isLanguageTigrigna ? "ናይ መሸጣ ዋጋ" : "Sale Price" }}</th>
-              <th class="px-6 py-4 text-right">{{ isLanguageTigrigna ? "ተግባራት" : "Actions" }}</th>
+              <th v-if="authStore.isAdmin" class="px-6 py-4 text-right">{{ isLanguageTigrigna ? "ተግባራት" : "Actions" }}</th>
             </tr>
           </thead>
           <tbody class="text-gray-700 dark:text-gray-200 text-sm divide-y divide-gray-100 dark:divide-gray-800">
@@ -72,7 +72,7 @@
               <td class="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">
                 {{ (product.pricePerUnit || 0).toLocaleString() }} <span class="text-[10px] font-normal">Birr</span>
               </td>
-              <td class="px-6 py-4 space-x-3 whitespace-nowrap text-right opacity-80 group-hover:opacity-100 transition-opacity">
+              <td v-if="authStore.isAdmin" class="px-6 py-4 space-x-3 whitespace-nowrap text-right opacity-80 group-hover:opacity-100 transition-opacity">
                 <!-- Add Stock (Plus Button) -->
                 <button v-if="authStore.isAdmin" @click.stop="openAddStockModal(product)"
                   class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-green-600 bg-green-50 hover:bg-green-600 hover:text-white dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-600 dark:hover:text-white transition-colors">
@@ -174,7 +174,7 @@
           </div>
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ isLanguageTigrigna ? "ሽም ኣቕሓ" : "Product Code" }}</label>
-            <input v-model="formData.productCode" type="text" required
+            <input v-model="formData.productCode" type="text"
               class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow" />
           </div>
           <div>
@@ -197,7 +197,7 @@
               class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow" />
           </div>
           
-          <div v-if="!isEditing">
+          <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ isLanguageTigrigna ? "በዝሒ" : "Available Quantity" }}</label>
             <input v-model.number="formData.availableQuantity" type="number" required
               class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow" />
@@ -210,7 +210,7 @@
           </div>
            <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ isLanguageTigrigna ? "ሽም ኣቕሓ" : "Product Description" }}</label>
-            <input v-model="formData.productDescription" type="text" required
+            <input v-model="formData.productDescription" type="text"
               class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-shadow" />
           </div>
         

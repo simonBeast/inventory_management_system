@@ -1,7 +1,7 @@
 <template>
   <span v-if="loading && !errorMessage" class="block loading loading-spinner text-blue-600 mt-8 mx-auto"></span>
 
-  <div v-else-if="!errorMessage && authStore.isLoggedIn && authStore.isAdmin"
+  <div v-else-if="!errorMessage && authStore.isLoggedIn"
     :class="containerClass"
     class="mx-auto mt-8 w-full max-w-7xl px-4 md:px-8 transition-all duration-300">
     
@@ -10,7 +10,7 @@
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ isLanguageTigrigna ? "መዝገብ ተመላሲ" : "Returns Records" }}</h1>
       </div>
-      <button @click="openCreateModal"
+      <button v-if="authStore.isAdmin" @click="openCreateModal"
         class="bg-gradient-to-r from-blue-600 to-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-700 shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-2 self-start sm:self-auto">
         <font-awesome-icon icon="plus" />
         {{ isLanguageTigrigna ? "ተመላሲ ፍጠር" : "Log Return" }}
@@ -82,7 +82,7 @@
               <th class="px-6 py-4">{{ isLanguageTigrigna ? "ምኽንያት" : "Reason" }}</th>
               <th class="px-6 py-4">{{ isLanguageTigrigna ? "ኩነታት" : "Status" }}</th>
               <th class="px-6 py-4">{{ isLanguageTigrigna ? "ዕለት" : "Date" }}</th>
-              <th class="px-6 py-4 text-right">{{ isLanguageTigrigna ? "ተግባራት" : "Actions" }}</th>
+              <th v-if="authStore.isAdmin" class="px-6 py-4 text-right">{{ isLanguageTigrigna ? "ተግባራት" : "Actions" }}</th>
             </tr>
           </thead>
           <tbody class="text-gray-700 dark:text-gray-200 text-sm divide-y divide-gray-100 dark:divide-gray-800">
@@ -105,7 +105,7 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-gray-500">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
-              <td class="px-6 py-4 space-x-3 whitespace-nowrap text-right opacity-80 group-hover:opacity-100 transition-opacity">
+              <td v-if="authStore.isAdmin" class="px-6 py-4 space-x-3 whitespace-nowrap text-right opacity-80 group-hover:opacity-100 transition-opacity">
                 <button @click="handleEdit(item)"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white transition-colors">
                   <font-awesome-icon icon="pen" class="w-3.5 h-3.5" />
@@ -119,7 +119,7 @@
               </td>
             </tr>
             <tr v-if="!returns?.data || returns.data.length === 0">
-              <td colspan="8" class="px-6 py-12 text-center text-gray-500">{{ isLanguageTigrigna ? "ምንም ተመላሲ የለን" : "No return records found." }}</td>
+              <td :colspan="authStore.isAdmin ? 8 : 7" class="px-6 py-12 text-center text-gray-500">{{ isLanguageTigrigna ? "ምንም ተመላሲ የለን" : "No return records found." }}</td>
             </tr>
           </tbody>
         </table>

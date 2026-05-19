@@ -20,6 +20,7 @@
     <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-1 ">
       <SidebarLink link="/productList" icon="box" :text="isLanguageTigrigna ? 'ዝርዝር ኣቑሑ ' : 'Product List'"/>
       <SidebarLink link="/saleList" icon="dollar-sign" :text="isLanguageTigrigna ? 'ዝርዝር መሸጣ' : 'Sales List'"/>
+      <SidebarLink link="/returnList" icon="undo" :text="isLanguageTigrigna ? 'ተመላሲ' : 'Returns'" />
       <SidebarLink link="/productData" icon="database" :text="isLanguageTigrigna ? 'መረዳእታ ኣቕሑ' : 'Product Data'" />
       <SidebarLink link="/reservationList" icon="bookmark"
         :text="isLanguageTigrigna ? 'ምዕዳግ ኣቕሓ' : 'Reservations'"

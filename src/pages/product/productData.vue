@@ -19,8 +19,8 @@
           <th class="px-4 py-3">{{isLanguageTigrigna ? "ኣቕሓ" : "Product"}}</th>
           <th class="px-4 py-3">{{isLanguageTigrigna ? "መዐቀኒ" : "Unit"}}</th>
           <th class="px-4 py-3">{{isLanguageTigrigna ? "ቕሩብ በዝሒ" :"Available Qty"}}</th>
-          <th class="px-4 py-3">{{isLanguageTigrigna ? "ዋጋ" :"Unit Price"}}</th>
-          <th class="px-4 py-3">{{isLanguageTigrigna ? "ጠቕላላ ዋጋ" :"Stock Value"}}</th>
+          <th v-if="authStore.isAdmin" class="px-4 py-3">{{isLanguageTigrigna ? "ዋጋ" :"Unit Price"}}</th>
+          <th v-if="authStore.isAdmin" class="px-4 py-3">{{isLanguageTigrigna ? "ጠቕላላ ዋጋ" :"Stock Value"}}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200 bg-white">
@@ -45,8 +45,8 @@
               title="Stock below minimum level"
             />
           </td>
-          <td class="px-4 py-3">{{ formatMoney(product.pricePerUnit) }}</td>
-          <td class="px-4 py-3 font-semibold text-indigo-700">
+          <td v-if="authStore.isAdmin" class="px-4 py-3">{{ formatMoney(product.pricePerUnit) }}</td>
+          <td v-if="authStore.isAdmin" class="px-4 py-3 font-semibold text-indigo-700">
             {{ formatMoney(Number(product.ProductDetail.availableQuantity) * Number(product.pricePerUnit)) }}
           </td>
         </tr>
