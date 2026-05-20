@@ -261,11 +261,34 @@ const paginationData = computed(() => sales.value?.pagination || null);
 const copiedId = ref(null);
 const copyToClipboard = async (id) => {
   try {
-    await navigator.clipboard.writeText(id);
+    const text = String(id);
+    if (navigator?.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      // Fallback for older browsers without Clipboard API.
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      if (!ok) {
+        throw new Error('execCommand copy failed');
+      }
+    }
     copiedId.value = id;
     setTimeout(() => { copiedId.value = null; }, 2000);
   } catch (e) {
     console.error('Failed to copy', e);
+    const promptMessage = isLanguageTigrigna.value
+      ? 'መሸጣ መለለዪ ኮፒ ግበር:'
+      : 'Copy Sale ID:';
+    if (typeof window !== 'undefined') {
+      window.prompt(promptMessage, String(id));
+    }
   }
 };
 
