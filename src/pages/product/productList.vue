@@ -47,7 +47,7 @@
               <th class="px-6 py-4">{{ isLanguageTigrigna ? "ሽም ኣቕሓ" : "Product Name" }}</th>
               <th class="px-6 py-4">{{ isLanguageTigrigna ? "ንኡስ ምድብ" : "Sub Category" }}</th>
               <th class="px-6 py-4 text-center">{{ isLanguageTigrigna ? "በዝሒ" : "Qty" }}</th>
-              <th class="px-6 py-4">{{ isLanguageTigrigna ? "ናይ መሸጣ ዋጋ" : "Sale Price" }}</th>
+              <th v-if="authStore.isAdmin" class="px-6 py-4">{{ isLanguageTigrigna ? "ናይ መሸጣ ዋጋ" : "Sale Price" }}</th>
               <th v-if="authStore.isAdmin" class="px-6 py-4 text-right">{{ isLanguageTigrigna ? "ተግባራት" : "Actions" }}</th>
             </tr>
           </thead>
@@ -69,7 +69,7 @@
                 {{ product.ProductDetail?.availableQuantity }}
                 <div v-if="product.quantity <= 10" class="text-[10px] font-normal text-red-400 uppercase tracking-tighter">Low Stock</div>
               </td>
-              <td class="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">
+              <td v-if="authStore.isAdmin" class="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">
                 {{ (product.pricePerUnit || 0).toLocaleString() }} <span class="text-[10px] font-normal">Birr</span>
               </td>
               <td v-if="authStore.isAdmin" class="px-6 py-4 space-x-3 whitespace-nowrap text-right opacity-80 group-hover:opacity-100 transition-opacity">
