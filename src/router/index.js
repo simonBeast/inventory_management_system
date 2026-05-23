@@ -20,6 +20,7 @@ import pageNotFound from '../components/pageNotFound.vue';
 import forgotPassword from '../components/forgotPassword.vue';
 import resetPassword from '../components/resetPassword.vue';
 import productData from '../pages/product/productData.vue';
+import expenseList from '../pages/expenses/expenseList.vue';
 
 const routes = [
     {
@@ -136,6 +137,12 @@ const routes = [
         path: '/salesAndProfit',
         name: 'salesProfit',
         component: salesAndProfit,
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/expenseList',
+        name: 'expenseList',
+        component: expenseList,
         meta: { requiresAuth: true },
     },
     {
