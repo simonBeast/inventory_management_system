@@ -70,6 +70,10 @@ const toneMap = {
     chip: 'bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300',
     icon: 'text-teal-600 dark:text-teal-300',
   },
+  receipt: {
+    chip: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300',
+    icon: 'text-emerald-600 dark:text-emerald-300',
+  },
   'sign-out-alt': {
     chip: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-300',
     icon: 'text-red-600 dark:text-red-300',

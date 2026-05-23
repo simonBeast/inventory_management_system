@@ -28,6 +28,7 @@
       <SidebarLink link="/productData" icon="database" :text="isLanguageTigrigna ? 'መረዳእታ ኣቕሑ' : 'Product Data'" />
       <SidebarLink link="/saleList" icon="dollar-sign" :text="isLanguageTigrigna ? 'መሸጣ' : 'Sales'" />
       <SidebarLink link="/returnList" icon="undo" :text="isLanguageTigrigna ? 'ተመላሲ' : 'Returns'" />
+      <SidebarLink link="/expenseList" icon="receipt" :text="isLanguageTigrigna ? 'Expenses' : 'Expenses'" />
       <SidebarLink link="/reservationList" icon="bookmark"
         :text="isLanguageTigrigna ? 'ምዕዳግ ኣቕሓ' : 'Reservations'"
         :badge="pendingReservationsBadge" />
