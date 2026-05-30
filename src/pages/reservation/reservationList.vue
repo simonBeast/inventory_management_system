@@ -452,17 +452,11 @@ async function submitSell() {
   try {
     // 1. Create a sale
     await createSaleMutation.mutateAsync({
+      reservationId: sellData.reservationId,
       productId: sellData.productId,
       quantity: sellData.quantity,
       salePricePerUnit: sellData.salePricePerUnit
     });
-    
-    // 2. Mark reservation as fulfilled
-    await updateMutation.mutateAsync({
-      id: sellData.reservationId,
-      data: { status: 'fulfilled' }
-    });
-
     queryClient.invalidateQueries(['reservations']);
     queryClient.invalidateQueries(['sales']);
     queryClient.invalidateQueries(['products']);
